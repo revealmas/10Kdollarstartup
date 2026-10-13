@@ -1,11 +1,13 @@
 PASS PHP parser private/Admin.php
 PASS PHP parser private/AiCheck.php
 PASS PHP parser private/Core.php
+PASS PHP parser private/Cv.php
 PASS PHP parser private/IntegrationSettings.php
 PASS PHP parser private/MaintenanceRunner.php
 PASS PHP parser private/SandboxCheck.php
 PASS PHP parser private/SandboxPurchase.php
 PASS PHP parser private/SupabaseStore.php
+PASS PHP parser private/SyntheticCv.php
 PASS PHP parser private/Transport.php
 PASS PHP parser private/config.example.php
 PASS PHP parser private/maintenance.php
@@ -112,7 +114,7 @@ PASS Bounded requests safely succeed or rate-limit
 {
   "requests": 100,
   "concurrency": 1,
-  "p50_ms": 3,
+  "p50_ms": 4,
   "p95_ms": 4,
   "responses": {
     "200": 55,
@@ -120,4 +122,4 @@ PASS Bounded requests safely succeed or rate-limit
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 42 checks passed. Native concurrency and actual Hostinger/provider tests are recorded separately; this local runner makes no external provider calls.
+RESULT 44 checks passed. Native concurrency and actual Hostinger/provider tests are recorded separately; this local runner makes no external provider calls.

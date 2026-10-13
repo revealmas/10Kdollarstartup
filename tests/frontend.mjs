@@ -26,8 +26,8 @@ const context=vm.createContext({document:{getElementById:element,createElement:(
  if(url.includes('login'))return response({csrf:'synthetic-signed-csrf'});
  if(url.includes('snapshot'))return response({payments_environment:'test',totals:{paid_orders:1},gates:{checkout_enabled:false},counts:{},orders:[],jobs:{count:0},ai_calls:{},storage_backend:'file',notice:'Synthetic'});
  return response({deepseek_configured:false,stripe_test_configured:false,webhook_configured:false});
-},location:{reload(){}},Date,Error,String,Object});
-await vm.runInContext('(async()=>{'+fs.readFileSync('public/admin.js','utf8')+'})()',context);
+},location:{reload(){}},Date,Error,String,Object,renderCv:()=>({synthetic:true})});
+await vm.runInContext('(async()=>{'+fs.readFileSync('public/admin.js','utf8').replace(/^import .*\n/gm,'')+'})()',context);
 await element('login').submit({preventDefault(){}});
 assert.equal(element('dashboard').hidden,false);assert(element('status').textContent.includes('not real revenue'));assert.equal(element('login').hidden,true);
 element('deepseek-key').value='synthetic-unsaved-sensitive-value';
@@ -38,16 +38,25 @@ assert.equal(element('status').textContent,'Owner sign-in required.');
 console.log('PASS Expired owner session clears dashboard and unsaved secrets, restoring sign-in');
 
 // An already fulfilled page must clear its cached package when access is revoked.
-const returnElements=new Map();const returnElement=id=>{if(!returnElements.has(id))returnElements.set(id,{hidden:true,disabled:false,textContent:'',addEventListener(type,handler){this[type]=handler;}});return returnElements.get(id);};
+const {cv:fixtureCv}=await import('../public/cv-example-data.js');bundle.cv=fixtureCv;
+const returnElements=new Map();const returnElement=id=>{if(!returnElements.has(id))returnElements.set(id,{hidden:true,disabled:false,textContent:'',value:'',children:[],replaceChildren(...items){this.children=items;},focus(){},addEventListener(type,handler){this[type]=handler;}});return returnElements.get(id);};
 const payment={paid:true,expired:false,downloads:0};
 class MockReturnApi {async start(){return {support_email:'support@example.invalid'};}async status(){if(payment.expired)throw Error('Package has expired or was deleted.');return {state:payment.paid?'paid':'revoked',paid:payment.paid};}async result(){return {package:bundle};}}
-const returnContext=vm.createContext({document:{getElementById:returnElement},ApplyPilot:MockReturnApi,packageText:()=> 'Synthetic paid preview',downloadText:()=>{payment.downloads++;},downloadDocx:()=>{payment.downloads++;},sessionStorage:{getItem:()=> 'synthetic-order'},window:{print(){}},Error});
+const returnContext=vm.createContext({document:{getElementById:returnElement},ApplyPilot:MockReturnApi,packageText:()=> 'Synthetic paid preview',downloadText:()=>{payment.downloads++;},renderCv:()=>({synthetic:true}),cvText:()=> 'Synthetic CV',downloadCvDocx:()=>{payment.downloads++;},downloadCvPdf:async()=>{payment.downloads++;},sessionStorage:{getItem:()=> 'synthetic-order'},window:{print(){}},Error});
 let returnSource=fs.readFileSync('public/return.js','utf8').replace(/^import .*\n/gm,'').replace(/check\(\);\s*$/,'await check();');
 await vm.runInContext('(async()=>{'+returnSource+'})()',returnContext);
 assert.equal(returnElement('preview').hidden,false);assert.equal(returnElement('download').hidden,false);
+returnElement('cv-name').value='Synthetic Name';returnElement('cv-email').value='synthetic@example.invalid';
 payment.paid=false;await returnElement('retry').click();
 for(const id of ['preview','download','docx','pdf'])assert.equal(returnElement(id).hidden,true,'Revocation must hide '+id);
-assert.equal(returnElement('preview').textContent,'');returnElement('download').click();assert.equal(payment.downloads,0,'Hidden stale download cannot use a cached package');
+assert.equal(returnElement('preview').textContent,'');assert.equal(returnElement('cv-page').children.length,0);assert.equal(returnElement('cv-name').value,'');assert.equal(returnElement('cv-email').value,'');returnElement('download').click();assert.equal(payment.downloads,0,'Hidden stale download cannot use a cached package');
 payment.paid=true;await returnElement('retry').click();payment.expired=true;await returnElement('retry').click();
 assert.equal(returnElement('preview').hidden,true);assert.equal(returnElement('preview').textContent,'');assert.equal(returnElement('status').textContent,'Package has expired or was deleted.');
 console.log('PASS Refund/expiry clears cached fulfilled content and stale download controls');
+
+const {cvDocxBytes}=await import('../public/cv-docx.js');const {cvPdfBytes}=await import('../public/cv-pdf.js');
+const exampleContact={name:'Synthetic Name',email:'synthetic@example.invalid',location:'Test City'};
+fs.writeFileSync('work/test-cv.docx',cvDocxBytes(fixtureCv,exampleContact,{example:true}));const pdfBytes=await cvPdfBytes(fixtureCv,exampleContact,{example:true});assert(new TextDecoder().decode(pdfBytes.slice(0,8)).startsWith('%PDF-'));fs.writeFileSync('work/test-cv.pdf',pdfBytes);
+console.log('PASS Structured CV Word/PDF export and safe local contact rendering');
+
+const index=fs.readFileSync('public/index.html','utf8');for(const id of ['cv-readiness','cv-original','cv-draft-example'])assert(index.includes('id="'+id+'"'),'CV preview anchor '+id);

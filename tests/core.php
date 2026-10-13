@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/../private/Core.php';
+require_once __DIR__.'/../private/SyntheticCv.php';
 use ApplyPilot\Service; use ApplyPilot\Problem;
 class MemoryStore implements ApplyPilot\Store {
     public array $data=['orders'=>[],'counts'=>[],'limits'=>[],'jobs'=>[],'jobs_at'=>0,'ai'=>[]];
@@ -23,14 +24,15 @@ $config=array_merge($config,['storage_key'=>'test-only','stripe_webhook_secret'=
     'stripe_live'=>false,'ai_enabled'=>true,'privacy_confirmed'=>true,'checkout_enabled'=>true,
     'licence_confirmed'=>true,'tax_confirmed'=>true,'merchant_confirmed'=>true,'production_tests_passed'=>true,
     'support_email'=>'support@example.com','merchant_descriptor'=>'MAFSAN APPLYPILOT','country_tax_rates'=>['AE'=>'']]);
-$resume='Candidate has five years of project coordination experience. Managed supplier communication and delivery schedules. Supported the preparation of monthly progress reports. Contact candidate@example.com or +971 50 123 4567.';
+$cvFixture=ApplyPilot\syntheticCvFixture();$resume=$cvFixture['resume'].' Contact candidate@example.com or +971 50 123 4567.';
 $job='A project coordinator role requiring supplier communication, reporting, schedule tracking and experience supporting stakeholder updates.';
 $report=['summary'=>'Your supplied CV shows relevant coordination experience. Verify the posting requirements before applying.',
-    'strengths'=>[['quote'=>'Managed supplier communication and delivery schedules.','reason'=>'This is relevant to supplier coordination in the posting.'],
-        ['quote'=>'Supported the preparation of monthly progress reports.','reason'=>'This provides evidence of relevant reporting exposure.']],
+    'strengths'=>[['quote'=>'Coordinated supplier communication and weekly delivery schedules.','reason'=>'This is relevant to supplier coordination in the posting.'],
+        ['quote'=>'Prepared monthly progress reports using Excel.','reason'=>'This provides evidence of relevant reporting exposure.']],
     'gaps'=>['The CV does not evidence the employer’s specific scheduling tools.','Verify any location and work authorisation requirements.'],
     'interview_questions'=>['How did you coordinate supplier delivery schedules?','How did you prepare progress reporting?'],
     'tips'=>['Review the employer’s current role requirements before submitting.','Explain only experience you can substantiate.']];
+$report['cv']=$cvFixture['cv'];
 $store=new MemoryStore(); $session=[]; $stripeCalls=[];
 $stripe=function($method,$path,$params,$key)use(&$session,&$stripeCalls){
     $stripeCalls[]=[$method,$path,$params,$key];
@@ -174,4 +176,19 @@ $early->webhook($unknown,signedHeader($unknown,$now));$earlyPaid=eventBody('evt_
 $early->webhook($earlyPaid,signedHeader($earlyPaid,$now));
 fails(fn()=>$early->result($ep['order_id'],'early-owner'),402,'Refund arriving before paid binding permanently prevents fulfillment');
 ok(!isset($earlyStore->data['pending_revocations']['pi_unknown']),'Consumed refund tombstone is removed after binding');
+$validCv=ApplyPilot\validateCv($cvFixture['cv'],ApplyPilot\redact($resume));
+ok($validCv['missing_details']===[]&&count($validCv['experience'])===2,'Structured CV has source-grounded employment and education');
+ok(str_contains(ApplyPilot\redact($resume),'2021 - 2023'),'Privacy redaction preserves career year ranges');
+ok(!isset($p['cv'])&&!str_contains(json_encode($p),'Example Distribution Co.'),'Free preview withholds full CV and employer metadata');
+foreach(['company'=>'Invented Employer','dates'=>'2099 - Present','title'=>'Chief Executive Officer']as$field=>$invented){$fake=$cvFixture['cv'];$fake['experience'][0][$field]=$invented;fails(fn()=>ApplyPilot\validateCv($fake,ApplyPilot\redact($resume)),502,'CV invented metadata rejected: '.$field);}
+$fake=$cvFixture['cv'];$fake['skills'][0]['text']='SAP';fails(fn()=>ApplyPilot\validateCv($fake,ApplyPilot\redact($resume)),502,'CV cannot insert a job requirement as an applicant skill');
+$fake=$cvFixture['cv'];$fake['experience'][0]['bullets'][0]['text']='Reduced delivery delays by 35%.';fails(fn()=>ApplyPilot\validateCv($fake,ApplyPilot\redact($resume)),502,'CV cannot add an unsupported metric');
+$fake=$cvFixture['cv'];$fake['experience'][1]['bullets'][0]=$fake['experience'][0]['bullets'][1];fails(fn()=>ApplyPilot\validateCv($fake,ApplyPilot\redact($resume)),502,'CV bullet cannot move between source employers');
+$partial=$report;$partial['cv']['experience'][0]['dates']='';$partialStore=new MemoryStore();$partialSvc=new Service($partialStore,$config,fn()=> $partial,$stripe,fn()=>$now);
+$partialPreview=$partialSvc->prepare($input,'partial-owner');ok(!$partialPreview['preview']['cv_readiness']['ready'],'Missing career details are shown before payment');
+$partialSvc->acknowledgePreview($partialPreview['order_id'],'partial-owner');fails(fn()=>$partialSvc->checkout(array_merge($checkout,['order_id'=>$partialPreview['order_id']]),'partial-owner'),422,'Incomplete CV cannot be purchased');
+$noCv=$report;unset($noCv['cv']);$noCvSvc=new Service(new MemoryStore(),$config,fn()=> $noCv,$stripe,fn()=>$now);fails(fn()=>$noCvSvc->prepare($input,'no-cv-owner'),502,'Review-only AI output cannot create a paid CV order');
+ok(str_contains(ApplyPilot\redact('Project period 2023-04-01 to 2024-06-30'),'2023-04-01'),'Privacy redaction preserves ISO career dates');
+ok(!str_contains(ApplyPilot\redact('DOB: 1990-01-01\n'."\nNationality: Synthetic nationality\nPhone +971 50 123 4567"),'Synthetic nationality'),'Sensitive labelled details are removed');
+fails(fn()=>ApplyPilot\cvGroundedText('Delivered 5 projects successfully.',['Worked on projects in 2025.'],'Worked on projects in 2025.',600),502,'CV metric cannot match digits inside an unrelated year');
 echo 'RESULT '.$passed.' checks passed. MemoryStore and mocked provider calls only.'.PHP_EOL;

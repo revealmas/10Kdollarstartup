@@ -7,8 +7,9 @@ $passed=0;
 function check(bool $value,string $name):void{global $passed;if(!$value)throw new RuntimeException($name);$passed++;echo 'PASS '.$name.PHP_EOL;}
 function rejects(callable $fn,int $status,string $name):void{try{$fn();}catch(Problem $e){check($e->status===$status,$name);return;}throw new RuntimeException($name);}
 $config=require __DIR__.'/../private/config.example.php';$config['deepseek_key']='synthetic-key-for-tests-only';$config['deepseek_model']='deepseek-flash';
+$cvFixture=ApplyPilot\syntheticCvFixture();
 $calls=0;$request=[];$invented=false;$finish='stop';
-$provider=ApplyPilot\deepseek($config,function($url,$method,$headers,$body)use(&$calls,&$request,&$invented,&$finish){
+$provider=ApplyPilot\deepseek($config,function($url,$method,$headers,$body)use(&$calls,&$request,&$invented,&$finish,$cvFixture){
  $calls++;$request=['url'=>$url,'method'=>$method,'body'=>json_decode($body,true)];
  return ['choices'=>[['finish_reason'=>$finish,'message'=>['reasoning_content'=>'not for the client',
   'content'=>json_encode(['summary'=>'The synthetic CV supports coordination and reporting; SAP experience is not evidenced.',
@@ -17,12 +18,12 @@ $provider=ApplyPilot\deepseek($config,function($url,$method,$headers,$body)use(&
    'gaps'=>['SAP experience is not evidenced by this fixture.'],
    'interview_questions'=>['How did you maintain delivery schedules and project records?'],
    'tips'=>['Review requirements and avoid claiming SAP experience without evidence.'],
-   'unexpected'=>'must not appear in the returned preview'])]]]];
+   'cv'=>$cvFixture['cv'],'unexpected'=>'must not appear in the returned preview'])]]]];
 });
 $result=(new AiCheck($config,$provider))->run();
 check($calls===1&&$result['ok']===true,'AI diagnostic uses one fixed synthetic provider call');
 check($request['url']==='https://api.deepseek.com/chat/completions'&&$request['method']==='POST','AI adapter calls the fixed HTTPS provider endpoint');
-check($request['body']['thinking']['type']==='disabled'&&$request['body']['max_tokens']===3000&&$request['body']['stream']===false,'Bounded non-thinking JSON request avoids default reasoning cost');
+check($request['body']['thinking']['type']==='disabled'&&$request['body']['max_tokens']===4500&&$request['body']['stream']===false,'Bounded non-thinking JSON request avoids default reasoning cost');
 check($request['body']['response_format']['type']==='json_object','Provider request requires structured JSON');
 check(str_contains($request['body']['messages'][1]['content'],'Synthetic CV fixture only'),'Diagnostic input contains synthetic fixture only');
 check(!str_contains(json_encode($result),'synthetic-key-for-tests-only')&&!str_contains(json_encode($result),'reasoning_content')&&!str_contains(json_encode($result),'must not appear'),'Diagnostic response excludes credentials, reasoning and unexpected provider fields');

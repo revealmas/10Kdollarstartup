@@ -17,12 +17,13 @@ final class SandboxPurchase {
     }
     public function prepare(string $owner):array{
         $this->assertReady();$memory=new SandboxMemoryStore();$c=$this->settings();
-        $resume='Synthetic QA fixture only. Coordinated supplier communication and weekly delivery schedules. Prepared progress reports and maintained project records. No real person is represented.';
+        $fixture=syntheticCvFixture();$resume=$fixture['resume'];
         $report=['summary'=>'Synthetic sandbox review: this fixture evidences coordination and reporting. It is not a real applicant or job posting.',
             'strengths'=>[['quote'=>'Coordinated supplier communication and weekly delivery schedules.','reason'=>'This is relevant to the synthetic coordination requirement.']],
             'gaps'=>['This synthetic fixture does not evidence SAP experience.'],
             'interview_questions'=>['How did you maintain delivery schedules and project records?'],
             'tips'=>['Synthetic QA only. Do not submit this fixture to an employer.']];
+        $report['cv']=$fixture['cv'];
         $service=new Service($memory,$c,fn()=> $report,$this->gateway);
         $result=$service->prepare(['resume'=>$resume,'job_description'=>'Synthetic coordinator posting for QA only, requiring supplier communication, reporting and SAP experience. No employer or real vacancy is represented.','consent'=>true,'adult'=>true],$owner);
         $id=$result['order_id'];$order=$memory->transaction(fn(&$s)=>$s['orders'][$id]);$order['source']='sandbox-qa';

@@ -24,7 +24,8 @@ jobs:
           node tests/frontend.mjs
           python3 - <<'PY'
           import zipfile, xml.etree.ElementTree as ET
-          with zipfile.ZipFile('work/test-export.docx') as z:
-              assert z.testzip() is None
-              for name in z.namelist(): ET.fromstring(z.read(name))
+          for filename in ['work/test-export.docx','work/test-cv.docx']:
+              with zipfile.ZipFile(filename) as z:
+                  assert z.testzip() is None
+                  for name in z.namelist(): ET.fromstring(z.read(name))
           PY

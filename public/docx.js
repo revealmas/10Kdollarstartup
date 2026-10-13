@@ -10,6 +10,9 @@ export function docxBytes(bundle){
     '_rels/.rels':'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
     'word/document.xml':`<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paragraphs}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr></w:body></w:document>`
   };
+  return zipXml(files);
+}
+export function zipXml(files){
   const locals=[];const centrals=[];let offset=0;let centralSize=0;
   for(const [name,content] of Object.entries(files)){
     const filename=encoder.encode(name);const data=encoder.encode(content);const crc=crc32(data);
@@ -17,7 +20,7 @@ export function docxBytes(bundle){
     const central=header(46);central.view.setUint32(0,0x02014b50,true);central.view.setUint16(4,20,true);central.view.setUint16(6,20,true);central.view.setUint16(8,0x800,true);central.view.setUint32(16,crc,true);central.view.setUint32(20,data.length,true);central.view.setUint32(24,data.length,true);central.view.setUint16(28,filename.length,true);central.view.setUint32(42,offset,true);
     locals.push(local.bytes,filename,data);centrals.push(central.bytes,filename);offset+=30+filename.length+data.length;centralSize+=46+filename.length;
   }
-  const end=header(22);end.view.setUint32(0,0x06054b50,true);end.view.setUint16(8,3,true);end.view.setUint16(10,3,true);end.view.setUint32(12,centralSize,true);end.view.setUint32(16,offset,true);
+  const end=header(22);end.view.setUint32(0,0x06054b50,true);end.view.setUint16(8,Object.keys(files).length,true);end.view.setUint16(10,Object.keys(files).length,true);end.view.setUint32(12,centralSize,true);end.view.setUint32(16,offset,true);
   const bytes=new Uint8Array(offset+centralSize+22);let position=0;for(const chunk of [...locals,...centrals,end.bytes]){bytes.set(chunk,position);position+=chunk.length;}return bytes;
 }
 export function downloadDocx(bundle){const url=URL.createObjectURL(new Blob([docxBytes(bundle)],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));const a=document.createElement('a');a.href=url;a.download='applypilot-application-review.docx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

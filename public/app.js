@@ -6,8 +6,8 @@ function items(id,values){const list=$(id);list.replaceChildren();for(const valu
 async function setup(){
   try{
     cfg=await api.start();
-    if(cfg.ai_enabled){$('service-note').textContent='Free discovery and previews. Optional full application bundle: USD $9 total, paid only after your preview.';$('ai-consent').hidden=false;$('prepare').disabled=false;$('prepare').textContent='Prepare my AI preview ↗';}
-    if(cfg.checkout_enabled){$('checkout').disabled=false;$('checkout').textContent='Unlock bundle · USD $9 ↗';}
+    if(cfg.ai_enabled){$('service-note').textContent='Free discovery and previews. Optional job-specific CV bundle: USD $9 total, paid only after your preview.';$('ai-consent').hidden=false;$('prepare').disabled=false;$('prepare').textContent='Prepare my AI preview ↗';}
+    if(cfg.checkout_enabled){$('checkout').textContent='Unlock my CV · USD $9 ↗';}
     for(const country of cfg.billing_countries){const option=document.createElement('option');option.value=country;option.textContent=country;$('country').append(option);}
     $('merchant-disclosure').textContent=`Seller: MAFSAN GLOBAL SOLUTIONS FZC-LLC. Support: ${cfg.support_email||'not configured yet'}. Your card statement will show: ${cfg.merchant_descriptor||'to be confirmed before checkout'}.`;
     await jobs('');
@@ -20,22 +20,21 @@ $('preview-form').addEventListener('submit',event=>{
   $('preview-status').textContent='Your local preview is ready. No text was sent to an AI provider.';
   $('local-preview').scrollIntoView({behavior:'smooth',block:'start'});
 });
-$('sample').addEventListener('click',()=>{
-  $('resume').value='Five years of project coordination experience. Managed supplier communication and delivery schedules. Prepared monthly progress reports and tracked project budgets. Proficient in Excel, stakeholder communication and documentation.';
-  $('job-description').value='We are looking for a project coordinator with experience in supplier communication, project schedules, budget reporting, stakeholder updates and risk management. Excel and documentation skills are useful.';
+$('sample').addEventListener('click',async()=>{
+  const {resume,job_description}=await import('./cv-example-data.js');$('resume').value=resume;$('job-description').value=job_description;
   $('preview-status').textContent='Sample filled. This is an illustrative CV and posting; choose Build my free preview to try it.';
 });
 $('clear').addEventListener('click',()=>{$('resume').value='';$('job-description').value='';$('local-preview').hidden=true;$('ai-preview').hidden=true;$('preview-status').textContent='Text cleared from this page.';});
 $('prepare').addEventListener('click',async()=>{
   if(!cfg?.ai_enabled)return;
   if(!$('consent').checked||!$('adult').checked){$('preview-status').textContent='Please confirm consent and that you are 18 or older.';return;}
-  $('prepare').disabled=true;$('preview-status').textContent='Preparing your guidance. No payment is required.';
+  $('prepare').disabled=true;$('preview-status').textContent='Preparing your CV draft and useful preview. No payment is required.';
   try{
     const result=await api.prepare($('resume').value,$('job-description').value,true,true);order=result.order_id;
     $('ai-summary').textContent=result.preview.summary;
     items('ai-strengths',result.preview.strengths.map(x=>`${x.quote} — ${x.reason}`));items('ai-gaps',result.preview.gaps);
-    $('ai-preview').hidden=false;await api.acknowledgePreview(order);
-    $('preview-status').textContent='Your AI preview is ready. Review it before deciding whether to unlock the bundle.';
+    $('ai-preview').hidden=false;const readiness=result.preview.cv_readiness;$('checkout').disabled=!cfg.checkout_enabled||readiness?.ready!==true;$('cv-readiness').textContent=readiness?.ready?`CV structure prepared: ${readiness.experience_entries} experience entries and ${readiness.education_entries} education entries. Full CV stays private until payment.`:(readiness?.missing_details||[]).join(' ');$('cv-original').textContent=result.preview.cv_example?.original||'';$('cv-draft-example').textContent=result.preview.cv_example?.draft||'';await api.acknowledgePreview(order);
+    $('preview-status').textContent='Your AI preview is ready. Review it before deciding whether to unlock your CV.';
     $('ai-preview').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){$('preview-status').textContent=e.message;}finally{$('prepare').disabled=false;}
 });

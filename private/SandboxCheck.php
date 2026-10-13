@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ApplyPilot;
 require_once __DIR__.'/Transport.php';
+require_once __DIR__.'/SyntheticCv.php';
 // Synthetic diagnostic state never enters the customer store or changes launch flags.
 final class SandboxMemoryStore implements Store {
     private array $data=['orders'=>[],'counts'=>[],'limits'=>[],'jobs'=>[],'jobs_at'=>0,'ai'=>[]];
@@ -23,12 +24,13 @@ final class SandboxCheck {
         // These test-only values exist in memory; no licence/privacy launch assertion is saved.
         foreach(['ai_enabled','privacy_confirmed','checkout_enabled','licence_confirmed','tax_confirmed','merchant_confirmed','production_tests_passed']as$key)$settings[$key]=true;
         $settings['support_email']='test@example.invalid';$settings['merchant_descriptor']='ApplyPilot sandbox diagnostic';$settings['country_tax_rates']=['AE'=>''];
-        $resume='Synthetic test fixture only. Managed supplier communication and delivery schedules. Prepared monthly progress reports and maintained project records.';
+        $fixture=syntheticCvFixture();$resume=$fixture['resume'];
         $report=['summary'=>'Synthetic diagnostic review only. No real applicant or AI provider is involved.',
-            'strengths'=>[['quote'=>'Managed supplier communication and delivery schedules.','reason'=>'Synthetic evidence for a deterministic diagnostic.']],
+            'strengths'=>[['quote'=>'Coordinated supplier communication and weekly delivery schedules.','reason'=>'Synthetic evidence for a deterministic diagnostic.']],
             'gaps'=>['This is a synthetic test, not applicant guidance.'],
             'interview_questions'=>['Synthetic interview question for test data only.'],
             'tips'=>['Do not use this fixture as a job application.']];
+        $report['cv']=$fixture['cv'];
         $service=new Service(new SandboxMemoryStore(),$settings,fn($r,$j)=>$report,
             function($method,$path,$params,$idempotency)use($gateway,&$phase,&$sessionId){
                 $phase=$method==='POST'?'sandbox Checkout creation':'sandbox payment configuration';
