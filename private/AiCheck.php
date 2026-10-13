@@ -47,7 +47,15 @@ final class AiCheck {
         }catch(\Throwable $e){
             $known=['Please check the text length and format.','The provider is unavailable. Please retry later.','AI preparation was incomplete. No payment is required.','AI preparation was invalid. No payment is required.','The analysis could not be validated. No payment is required.','The analysis cited experience not in your CV. No payment is required.','The CV draft has invalid text or structure. No payment is required.','The CV draft cited facts absent from your supplied CV. No payment is required.','A CV employer, qualification or date could not be verified. No payment is required.','CV evidence is incomplete. No payment is required.','The CV draft added a number not supported by its evidence. No payment is required.','The CV headline must use a role or phrase in your supplied CV.','The CV summary could not be validated.','The CV structure could not be validated.','Invalid CV skill.','A CV skill was not present in its source evidence.','CV experience could not be validated.','Invalid CV bullet.','A CV bullet was attributed to a different source role. No payment is required.','Invalid CV education.'];
             $reason=$e instanceof Problem&&in_array($e->getMessage(),$known,true)?$e->getMessage():'Check model, credits and provider settings.';
-            throw new Problem(502,'Synthetic AI check failed: '.$reason.' No provider response, key or headers are exposed.');
+            $shape=[];$cached=$this->diagnostics?->transaction(fn(&$s)=>$s['synthetic_ai_report']['report']??[]);
+            if(is_array($cached)){
+                $inspect=function($value,$field,$min,$max)use(&$shape){if(!is_string($value))$shape[]=$field.' is not text';elseif(strlen(trim($value))<$min||strlen($value)>$max)$shape[]=$field.' length '.strlen(trim($value)).' (expected '.$min.'..'.$max.')';};
+                $inspect($cached['summary']??null,'summary',20,1000);
+                foreach($cached['strengths']??[]as$i=>$item)if(is_array($item)){$inspect($item['quote']??null,'strength quote '.$i,10,500);$inspect($item['reason']??null,'strength reason '.$i,10,700);}
+                foreach(['gaps','interview_questions','tips']as$field)foreach($cached[$field]??[]as$i=>$value)$inspect($value,$field.' '.$i,10,1000);
+            }
+            $details=$shape?' Schema: '.implode('; ',array_slice($shape,0,8)).'.':'';
+            throw new Problem(502,'Synthetic AI check failed: '.$reason.$details.' No provider response, key or headers are exposed.');
         }
     }
 }
