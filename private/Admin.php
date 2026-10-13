@@ -56,6 +56,7 @@ final class Admin {
                 'jobs'=>['count'=>count($s['jobs']),'checked_at'=>$s['jobs_at']?gmdate('c',$s['jobs_at']):null],
                 'payments_environment'=>($this->config['stripe_live']??false)?'live':'test',
                 'gates'=>$gates,'storage_backend'=>$this->config['storage_backend']??'file',
+                'maintenance'=>isset($s['maintenance'])?array_intersect_key($s['maintenance'],array_flip(['checked_at','ok','packages_purged','sessions_purged'])):null,
                 'notice'=>'Operational counts, not a financial ledger. Reconcile fees, refunds and taxes in Stripe. CV text, provider keys and browser owner secrets are excluded.'];
         });
     }

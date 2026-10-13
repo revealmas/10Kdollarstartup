@@ -15,6 +15,7 @@ jobs:
           php tests/storage.php
           php tests/sandbox.php
           php tests/ai-check.php
+          php tests/maintenance.php
       - name: HTTP access controls and bounded local load
         run: node tests/http.mjs
       - name: Frontend and export verification
