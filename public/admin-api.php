@@ -40,9 +40,9 @@ try{
   if(!is_array($input)||!is_string($input['order_id']??null))throw new \ApplyPilot\Problem(422,'Invalid test order.');
   answer(200,$qa->checkout($input['order_id'],$owner,($input['reviewed']??false)===true));
  }
- if($action==='ai-check'){
-  session_write_close();require_once $dir.'/AiCheck.php';$checker=new \ApplyPilot\AiCheck($config);$checker->assertReady();$admin->reserveAiCheck();
-  try{$result=$checker->run();$admin->recordAiCheck(true);answer(200,$result);}catch(\ApplyPilot\Problem $e){$admin->recordAiCheck(false);throw $e;}
+ if(in_array($action,['ai-check','ai-revalidate'],true)){
+  session_write_close();require_once $dir.'/AiCheck.php';$checker=new \ApplyPilot\AiCheck($config,null,$store);$checker->assertReady();if($action==='ai-check')$admin->reserveAiCheck();
+  try{$result=$checker->run($action==='ai-revalidate');if($action==='ai-check')$admin->recordAiCheck(true);answer(200,$result);}catch(\ApplyPilot\Problem $e){if($action==='ai-check')$admin->recordAiCheck(false);throw $e;}
  }
  if(in_array($action,['integration-status','save-integrations'],true)){
   require_once $dir.'/IntegrationSettings.php';

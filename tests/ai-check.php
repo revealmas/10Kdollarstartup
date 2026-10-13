@@ -31,10 +31,13 @@ check(!isset($result['order_id'])&&$config['ai_enabled']===false&&$config['priva
 $invented=true;rejects(fn()=>(new AiCheck($config,$provider))->run(),502,'Invented CV evidence rejects the diagnostic');
 $invented=false;$finish='length';rejects(fn()=>(new AiCheck($config,$provider))->run(),502,'Truncated provider output rejects the diagnostic without retries');
 $before=$calls;rejects(fn()=>(new AiCheck(array_merge($config,['deepseek_key'=>'']),$provider))->run(),503,'Missing AI configuration fails before the provider');check($calls===$before,'Missing settings consume no provider request');
-$store=new AiCheckMemoryStore();$admin=new Admin($store,$config);$admin->reserveAiCheck();
-rejects(fn()=>$admin->reserveAiCheck(),429,'Repeated AI diagnostics cannot consume another hourly allowance');
-check(array_sum($admin->snapshot()['ai_calls'])===1,'Diagnostic credit reservation shares customer daily AI counts');
+$store=new AiCheckMemoryStore();$admin=new Admin($store,$config);$admin->reserveAiCheck();$admin->reserveAiCheck();
+rejects(fn()=>$admin->reserveAiCheck(),429,'Repeated AI diagnostics cannot consume more than two hourly calls');
+check(array_sum($admin->snapshot()['ai_calls'])===2,'Diagnostic credit reservation shares customer daily AI counts');
 $config['daily_ai_limit']=0;$zero=new Admin(new AiCheckMemoryStore(),$config);rejects(fn()=>$zero->reserveAiCheck(),429,'Zero daily credit allowance prevents diagnostic calls');
 $config['daily_ai_limit']=20;$config['total_ai_limit']=0;$closed=new Admin(new AiCheckMemoryStore(),$config);
 rejects(fn()=>$closed->reserveAiCheck(),429,'Owner diagnostics also respect the cumulative pilot allowance');
+$config['total_ai_limit']=30;$finish='stop';$cache=new AiCheckMemoryStore();$cachedChecker=new AiCheck($config,$provider,$cache);$cachedChecker->run();$before=$calls;$rechecked=$cachedChecker->run(true);check($calls===$before&&$rechecked['revalidated']===true,'Cached synthetic draft revalidates without another provider call');
+$missing=new AiCheck($config,$provider,new AiCheckMemoryStore());rejects(fn()=> $missing->run(true),409,'No cached draft cannot trigger an implicit provider retry');
+$unsafe=new AiCheck($config,fn()=>throw new Problem(502,'sk-secret-untrusted-provider-error'));try{$unsafe->run();}catch(Problem $e){check(!str_contains($e->getMessage(),'sk-secret'),'Diagnostic errors use fixed allowlisted messages only');}
 echo 'AI CHECK RESULT '.$passed.' mocked checks passed; no external provider call.'.PHP_EOL;

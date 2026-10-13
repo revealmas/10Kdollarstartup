@@ -191,4 +191,7 @@ $noCv=$report;unset($noCv['cv']);$noCvSvc=new Service(new MemoryStore(),$config,
 ok(str_contains(ApplyPilot\redact('Project period 2023-04-01 to 2024-06-30'),'2023-04-01'),'Privacy redaction preserves ISO career dates');
 ok(!str_contains(ApplyPilot\redact('DOB: 1990-01-01\n'."\nNationality: Synthetic nationality\nPhone +971 50 123 4567"),'Synthetic nationality'),'Sensitive labelled details are removed');
 fails(fn()=>ApplyPilot\cvGroundedText('Delivered 5 projects successfully.',['Worked on projects in 2025.'],'Worked on projects in 2025.',600),502,'CV metric cannot match digits inside an unrelated year');
+$shortSkill=$cvFixture['cv'];$shortSkill['skills'][0]=['text'=>'Excel','quote'=>'Excel'];ok(count(ApplyPilot\validateCv($shortSkill,ApplyPilot\redact($resume))['skills'])===6,'Exact short source skill names remain valid evidence');
+fails(fn()=>ApplyPilot\validateCv(array_merge($cvFixture['cv'],['skills'=>[['text'=>'SAP','quote'=>'ASAP reporting experience']]]),ApplyPilot\redact($resume).' ASAP reporting experience'),502,'Skill cannot match characters inside an unrelated word');
+$store->data['synthetic_ai_report']=['expires_at'=>$now-1,'report'=>['synthetic'=>'discard']];$svc->cleanup();ok(!isset($store->data['synthetic_ai_report']),'Cleanup purges expired fictional provider drafts');
 echo 'RESULT '.$passed.' checks passed. MemoryStore and mocked provider calls only.'.PHP_EOL;

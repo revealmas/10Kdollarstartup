@@ -371,6 +371,7 @@ final class Service {
     }
     public function cleanup(): array {
         return $this->store->transaction(function(&$s){
+            if(($s['synthetic_ai_report']['expires_at']??PHP_INT_MAX)<$this->now())unset($s['synthetic_ai_report']);
             $n=0;
             foreach($s['orders'] as &$o) {
                 if($o['expires']<=$this->now() && $o['package']) { $o['package']=null; $o['preview']=null; $n++; }

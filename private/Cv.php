@@ -2,8 +2,8 @@
 declare(strict_types=1);
 namespace ApplyPilot;
 function cvTextValue($value,int $min,int $max):string{try{return boundedText($value,$min,$max);}catch(Problem $e){throw new Problem(502,'The CV draft has invalid text or structure. No payment is required.');}}
-function cvEvidence($value,string $source):string{
-    $quote=cvTextValue($value,10,700);
+function cvEvidence($value,string $source,int $min=10):string{
+    $quote=cvTextValue($value,$min,700);
     if(strpos($source,$quote)===false)throw new Problem(502,'The CV draft cited facts absent from your supplied CV. No payment is required.');
     return $quote;
 }
@@ -31,8 +31,8 @@ function validateCv(array $cv,string $source):array{
     foreach(['skills'=>24,'experience'=>12,'education'=>8]as$field=>$max)
         if(!is_array($cv[$field]??null)||count($cv[$field])>$max)throw new Problem(502,'The CV structure could not be validated.');
     foreach($cv['skills']as$item){
-        if(!is_array($item))throw new Problem(502,'Invalid CV skill.');$quote=cvEvidence($item['quote']??null,$source);$text=cvTextValue($item['text']??null,2,90);
-        if(stripos($quote,$text)===false)throw new Problem(502,'A CV skill was not present in its source evidence.');
+        if(!is_array($item))throw new Problem(502,'Invalid CV skill.');$quote=cvEvidence($item['quote']??null,$source,2);$text=cvTextValue($item['text']??null,2,90);
+        if(!preg_match('/(?<![\pL\pN])'.preg_quote($text,'/').'(?![\pL\pN])/ui',$quote))throw new Problem(502,'A CV skill was not present in its source evidence.');
         $out['skills'][]=['text'=>$text,'quote'=>$quote];
     }
     $boundaries=[];
