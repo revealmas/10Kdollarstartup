@@ -13,3 +13,26 @@ for(const path of ['public/app.js','public/return.js','public/admin.js']){
 }
 assert(!fs.readFileSync('public/index.html','utf8').includes('sk_live_'));
 console.log('PASS Local preview, Word ZIP generation and safe rendering checks');
+
+// Exercise an owner session that expires while the dashboard remains open.
+const {default:vm}=await import('node:vm');
+const elements=new Map();
+const element=id=>{if(!elements.has(id))elements.set(id,{hidden:false,value:'',children:[],dataset:{},replaceChildren(...items){this.children=items;},append(...items){this.children.push(...items);},addEventListener(type,handler){this[type]=handler;}});return elements.get(id);};
+let expired=false;
+const response=body=>({ok:true,status:200,json:async()=>body});
+const context=vm.createContext({document:{getElementById:element,createElement:()=>element('generated-'+elements.size)},fetch:async url=>{
+ if(url.includes('bootstrap'))return response({csrf:'synthetic-csrf',signed_in:false});
+ if(expired)return {ok:false,status:401,json:async()=>({error:'Owner sign-in required.'})};
+ if(url.includes('login'))return response({csrf:'synthetic-signed-csrf'});
+ if(url.includes('snapshot'))return response({totals:{paid_orders:1},gates:{checkout_enabled:false},counts:{},orders:[],jobs:{count:0},ai_calls:{},storage_backend:'file',notice:'Synthetic'});
+ return response({deepseek_configured:false,stripe_test_configured:false,webhook_configured:false});
+},location:{reload(){}},Date,Error,String,Object});
+await vm.runInContext('(async()=>{'+fs.readFileSync('public/admin.js','utf8')+'})()',context);
+await element('login').submit({preventDefault(){}});
+assert.equal(element('dashboard').hidden,false);assert.equal(element('login').hidden,true);
+element('deepseek-key').value='synthetic-unsaved-sensitive-value';
+expired=true;await element('refresh').click();
+assert.equal(element('dashboard').hidden,true);assert.equal(element('logout').hidden,true);assert.equal(element('login').hidden,false);
+assert.equal(element('totals').children.length,0);assert.equal(element('deepseek-key').value,'');
+assert.equal(element('status').textContent,'Owner sign-in required.');
+console.log('PASS Expired owner session clears dashboard and unsaved secrets, restoring sign-in');
