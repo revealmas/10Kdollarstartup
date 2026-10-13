@@ -23,6 +23,21 @@ final class Admin {
     public function recordSandboxCheck(bool $passed):void {
         $this->store->transaction(function(&$s)use($passed){$day=gmdate('Y-m-d');$event=$passed?'sandbox_check_passed':'sandbox_check_failed';$s['counts'][$day][$event]=($s['counts'][$day][$event]??0)+1;});
     }
+    public function reserveAiCheck():void {
+        $hour=intdiv(time(),3600);$day=gmdate('Y-m-d');
+        $allowed=$this->store->transaction(function(&$s)use($hour,$day){
+            foreach(array_keys($s['ai_checks']??[])as$old)if((int)$old<=$hour-24)unset($s['ai_checks'][$old]);
+            $dayChecks=array_sum($s['ai_checks']??[]);
+            if(($s['ai_checks'][$hour]??0)>=1||$dayChecks>=3
+                ||($s['ai'][$day]??0)>=min(20,max(0,(int)($this->config['daily_ai_limit']??0))))return false;
+            $s['ai_checks'][$hour]=($s['ai_checks'][$hour]??0)+1;
+            $s['ai'][$day]=($s['ai'][$day]??0)+1;return true;
+        });
+        if(!$allowed)throw new Problem(429,'AI checks are limited to one per hour, three per 24 hours and the shared daily AI allowance. Failed calls count.');
+    }
+    public function recordAiCheck(bool $passed):void {
+        $this->store->transaction(function(&$s)use($passed){$day=gmdate('Y-m-d');$event=$passed?'ai_check_passed':'ai_check_failed';$s['counts'][$day][$event]=($s['counts'][$day][$event]??0)+1;});
+    }
     public function snapshot(): array {
         return $this->store->transaction(function(&$s){
             $orders=[];$paid=0;$revoked=0;$active=0;

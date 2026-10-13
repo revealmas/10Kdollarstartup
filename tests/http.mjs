@@ -25,12 +25,15 @@ try{
  check((await req('webhook',{body:{id:'forged'}})).response.status===400,'HTTP forged webhook denied');
  const a=await req('bootstrap',{admin:true,method:'GET'});cookie=a.response.headers.get('set-cookie').split(';')[0];csrf=a.body.csrf;
  check((await req('sandbox-check',{admin:true})).response.status===401,'Anonymous sandbox diagnostic denied');
+ check((await req('ai-check',{admin:true})).response.status===401,'Anonymous AI diagnostic denied');
  check((await req('snapshot',{admin:true})).response.status===401,'Unauthenticated admin data denied');
  check((await req('save-integrations',{admin:true,body:{stripe_key:'rk_test_'+ 'A'.repeat(24)}})).response.status===401,'Anonymous credential configuration denied');
  check((await req('login',{admin:true,body:{password:'wrong'}})).response.status===401,'Wrong owner credential denied');
  const login=await req('login',{admin:true,body:{password}});check(login.response.status===200,'Owner login succeeds');csrf=login.body.csrf;cookie=login.response.headers.get('set-cookie').split(';')[0];
  check((await req('sandbox-check',{admin:true})).response.status===503,'Missing sandbox settings fail before provider calls');
  check((await req('sandbox-check',{admin:true,token:'bad'})).response.status===403,'Sandbox diagnostic CSRF forgery denied');
+ check((await req('ai-check',{admin:true})).response.status===503,'Missing AI settings fail before credit reservation');
+ check((await req('ai-check',{admin:true,token:'bad'})).response.status===403,'AI diagnostic CSRF forgery denied');
  const snap=await req('snapshot',{admin:true});check(snap.response.status===200&&!!snap.body.gates,'Authenticated operational dashboard');
  check(!JSON.stringify(snap.body).includes(password),'Owner password absent from dashboard');
  const setting=await req('save-integrations',{admin:true,body:{stripe_key:'rk_test_'+'A'.repeat(24)}});

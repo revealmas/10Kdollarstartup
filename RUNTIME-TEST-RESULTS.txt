@@ -1,4 +1,5 @@
 PASS PHP parser private/Admin.php
+PASS PHP parser private/AiCheck.php
 PASS PHP parser private/Core.php
 PASS PHP parser private/IntegrationSettings.php
 PASS PHP parser private/SandboxCheck.php
@@ -10,6 +11,7 @@ PASS PHP parser private/metrics.php
 PASS PHP parser private/refresh_jobs.php
 PASS PHP parser public/admin-api.php
 PASS PHP parser public/api.php
+PASS PHP parser tests/ai-check.php
 PASS PHP parser tests/core.php
 PASS PHP parser tests/router.php
 PASS PHP parser tests/sandbox.php
@@ -42,6 +44,22 @@ PASS Unexpected actual Checkout amount fails diagnostic
 PASS Failed validation attempts test-session cleanup
 PASS Owner sandbox diagnostic quota is bounded
 SANDBOX RESULT 11 mocked checks passed; no external Stripe call.
+PASS Bounded synthetic AI diagnostic tests
+PASS AI diagnostic uses one fixed synthetic provider call
+PASS AI adapter calls the fixed HTTPS provider endpoint
+PASS Bounded non-thinking JSON request avoids default reasoning cost
+PASS Provider request requires structured JSON
+PASS Diagnostic input contains synthetic fixture only
+PASS Diagnostic response excludes credentials, reasoning and unexpected provider fields
+PASS Diagnostic exposes no customer order and leaves launch gates unchanged
+PASS Invented CV evidence rejects the diagnostic
+PASS Truncated provider output rejects the diagnostic without retries
+PASS Missing AI configuration fails before the provider
+PASS Missing settings consume no provider request
+PASS Repeated AI diagnostics cannot consume another hourly allowance
+PASS Diagnostic credit reservation shares customer daily AI counts
+PASS Zero daily credit allowance prevents diagnostic calls
+AI CHECK RESULT 14 mocked checks passed; no external provider call.
 PASS Gateway bootstrap
 PASS Secure HttpOnly cookie
 PASS No-cache private responses
@@ -60,12 +78,12 @@ PASS Bounded requests safely succeed or rate-limit
 {
   "requests": 100,
   "concurrency": 1,
-  "p50_ms": 4,
-  "p95_ms": 6,
+  "p50_ms": 3,
+  "p95_ms": 4,
   "responses": {
     "200": 55,
     "429": 45
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 33 local WebAssembly checks passed. Native concurrency and Hostinger access controls verified separately; actual provider/payment end-to-end tests remain pending.
+RESULT 36 checks passed. Native concurrency and Hostinger access controls verified separately; actual new AI provider tests pending.
