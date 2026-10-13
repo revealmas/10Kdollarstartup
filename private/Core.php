@@ -87,6 +87,15 @@ function redact(string $text): string {
     return preg_replace_callback('/(?<!\w)\+?\d[\d ().-]{7,}\d(?!\w)/',fn($m)=>strlen(preg_replace('/\D/','',$m[0]))<9?$m[0]:'[number removed]',$text);
 }
 require_once __DIR__.'/Cv.php';
+function reportListText($value,string $field):string {
+    if(is_string($value))return boundedText($value,10,1000);
+    if(!is_array($value))throw new Problem(502,'The analysis could not be validated. No payment is required.');
+    $keys=match($field){'gaps'=>['text','requirement','description','reason','evidence','note','recommendation'],'interview_questions'=>['question','text'],'tips'=>['tip','text','recommendation'],default=>[]};
+    $parts=[];foreach($keys as$key)if(isset($value[$key])&&is_string($value[$key])&&trim($value[$key])!=='')$parts[]=boundedText($value[$key],1,700);
+    if(!$parts)throw new Problem(502,'The analysis could not be validated. No payment is required.');
+    $text=implode(' — ',$parts);if($field==='gaps'&&isset($value['requirement'])&&count($parts)===1)$text='Requirement to verify: '.$text;
+    return boundedText($text,10,1000);
+}
 function validateReport(array $report, string $resume): array {
     $out = ['summary'=>boundedText($report['summary'] ?? null,20,1000)];
     $strengths = $report['strengths'] ?? null;
@@ -100,9 +109,9 @@ function validateReport(array $report, string $resume): array {
         $out['strengths'][]=['quote'=>$quote,'reason'=>boundedText($item['reason'] ?? null,10,700)];
     }
     foreach (['gaps','interview_questions','tips'] as $field) {
-        if (!is_array($report[$field] ?? null) || count($report[$field])<1 || count($report[$field])>12)
+        if (!is_array($report[$field] ?? null) || count($report[$field])<($field==='gaps'?0:1) || count($report[$field])>12)
             throw new Problem(502,'The analysis could not be validated. No payment is required.');
-        $out[$field]=array_map(fn($s)=>boundedText($s,10,1000),$report[$field]);
+        $out[$field]=array_map(fn($s)=>reportListText($s,$field),$report[$field]);
     }
     if(isset($report['cv'])&&is_array($report['cv']))$out['cv']=validateCv($report['cv'],$resume);
     return $out; // Explicit allowlist strips provider output / hidden keys.
