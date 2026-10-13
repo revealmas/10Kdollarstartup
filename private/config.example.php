@@ -13,6 +13,7 @@ return [
     'deepseek_key' => getenv('DEEPSEEK_API_KEY') ?: '',
     'deepseek_model' => '', // confirm model available in user's account
     'daily_ai_limit' => 20, // reserve before calls, including failed calls
+    'total_ai_limit' => 30, // cumulative pilot calls; increase only after reviewing credits
     'support_email' => '',
     'merchant_descriptor' => '', // verified actual descriptor shown by Stripe
     'licence_confirmed' => false,

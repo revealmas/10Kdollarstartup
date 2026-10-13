@@ -34,4 +34,6 @@ $store=new AiCheckMemoryStore();$admin=new Admin($store,$config);$admin->reserve
 rejects(fn()=>$admin->reserveAiCheck(),429,'Repeated AI diagnostics cannot consume another hourly allowance');
 check(array_sum($admin->snapshot()['ai_calls'])===1,'Diagnostic credit reservation shares customer daily AI counts');
 $config['daily_ai_limit']=0;$zero=new Admin(new AiCheckMemoryStore(),$config);rejects(fn()=>$zero->reserveAiCheck(),429,'Zero daily credit allowance prevents diagnostic calls');
+$config['daily_ai_limit']=20;$config['total_ai_limit']=0;$closed=new Admin(new AiCheckMemoryStore(),$config);
+rejects(fn()=>$closed->reserveAiCheck(),429,'Owner diagnostics also respect the cumulative pilot allowance');
 echo 'AI CHECK RESULT '.$passed.' mocked checks passed; no external provider call.'.PHP_EOL;

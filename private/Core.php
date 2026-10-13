@@ -104,6 +104,17 @@ function validateReport(array $report, string $resume): array {
     return $out; // Explicit allowlist strips provider output / hidden keys.
 }
 
+// Reserve atomically before the provider call. Failures consume the reservation.
+// This counter persists when daily history is purged; it never resets at midnight.
+function reserveAiAllowance(array &$state,array $config,string $day): bool {
+    $used=$state['ai_total']??array_sum($state['ai']??[]);
+    $totalLimit=max(0,(int)($config['total_ai_limit']??30));
+    if($used>=$totalLimit||($state['ai'][$day]??0)>=max(0,(int)($config['daily_ai_limit']??0)))return false;
+    $state['ai_total']=$used+1;
+    $state['ai'][$day]=($state['ai'][$day]??0)+1;
+    return true;
+}
+
 final class Service {
     private Store $store; private array $config; private $ai; private $stripe; private $clock;
     public function __construct(Store $store, array $config, callable $ai, callable $stripe, ?callable $clock=null) {
@@ -144,10 +155,9 @@ final class Service {
             $ownerKey=$day.':'.hash('sha256',$owner);
             $s['owner_ai'][$ownerKey]=($s['owner_ai'][$ownerKey] ?? 0)+1;
             if($s['owner_ai'][$ownerKey]>3)return false;
-            $s['ai'][$day]=($s['ai'][$day] ?? 0)+1;
-            return $s['ai'][$day] <= (int)$this->config['daily_ai_limit'];
+            return reserveAiAllowance($s,$this->config,$day);
         });
-        if (!$allowed) throw new Problem(429,'Today’s preparation limit has been reached. Free jobs remain available.');
+        if (!$allowed) throw new Problem(429,'The preparation allowance has been reached. Free jobs remain available.');
         $report=validateReport(($this->ai)($resume,$job),$resume);
         $id=bin2hex(random_bytes(16));
         // Build before checkout; a failed AI call can never leave a paid empty order.
@@ -257,7 +267,10 @@ final class Service {
             return $this->store->transaction(function(&$s)use($session,$e){
                 $id=$session['metadata']['order_id'] ?? '';
                 $o=$s['orders'][$id] ?? null;
-                if (!$o) throw new Problem(409,'Order not found; investigate payment before fulfillment.');
+                if (!$o) {
+                    if(($session['metadata']['product']??'')!=='applypilot-v1')return ['ok'=>true,'ignored'=>true];
+                    throw new Problem(409,'Order not found; investigate payment before fulfillment.');
+                }
                 if (in_array($e['id'],$o['events'],true)) return ['ok'=>true];
                 // The event may race our Checkout response; retry until session binding is persisted.
                 if (($o['checkout']['id'] ?? null) !== ($session['id'] ?? null)) throw new Problem(409,'Session mismatch; retry.');
@@ -267,20 +280,26 @@ final class Service {
                     || ($session['livemode'] ?? null)!==(bool)$this->config['stripe_live']
                     || ($session['client_reference_id'] ?? '')!==$id
                     || ($session['metadata']['product'] ?? '')!=='applypilot-v1'
-                    || ($session['customer_details']['address']['country'] ?? '')!==$o['country'])
+                    || ($session['customer_details']['address']['country'] ?? '')!==$o['country']
+                    || !is_string($session['payment_intent']??null)
+                    || !preg_match('/^pi_[A-Za-z0-9]+$/D',$session['payment_intent']))
                     throw new Problem(409,'Payment details need review.');
                 if (!$o['paid']) $this->count($s,'payment_verified');
                 $s['orders'][$id]['paid']=true;
                 $s['orders'][$id]['payment_intent']=$session['payment_intent'];
                 $s['orders'][$id]['events'][]=$e['id'];
                 // Never reinstate an order revoked by a refund/dispute/deletion.
-                $s['orders'][$id]['state']=$o['revoked']?'revoked':'paid';
+                $revoked=$o['revoked']||isset($s['pending_revocations'][$session['payment_intent']]);
+                if($revoked&&!$o['revoked'])$this->count($s,'access_revoked');
+                $s['orders'][$id]['revoked']=$revoked;
+                $s['orders'][$id]['state']=$revoked?'revoked':'paid';
+                unset($s['pending_revocations'][$session['payment_intent']]);
                 return ['ok'=>true];
             });
         }
         if (in_array($type,['charge.refunded','charge.dispute.created'],true)) {
             $pi=$object['payment_intent'] ?? '';
-            if (!$pi) throw new Problem(400,'Payment reference missing.');
+            if(!is_string($pi)||!preg_match('/^pi_[A-Za-z0-9]+$/D',$pi))throw new Problem(400,'Payment reference missing.');
             return $this->store->transaction(function(&$s)use($pi,$e){
                 $found=false;
                 foreach ($s['orders'] as &$o) if ($o['payment_intent']===$pi) {
@@ -290,7 +309,15 @@ final class Service {
                         $this->count($s,'access_revoked');
                     }
                 }
-                if (!$found) throw new Problem(409,'Payment has not been bound yet; retry.');
+                if(!$found){
+                    // Shared merchant events can concern another product. Keep a bounded,
+                    // private tombstone so an earlier refund still revokes a later binding.
+                    foreach($s['pending_revocations']??[]as$key=>$item)
+                        if(($item['at']??0)<$this->now()-604800)unset($s['pending_revocations'][$key]);
+                    if(!isset($s['pending_revocations'][$pi])&&count($s['pending_revocations']??[])>=1000)
+                        throw new Problem(503,'Payment events need review; retry.');
+                    $s['pending_revocations'][$pi]=['at'=>$this->now()];
+                }
                 return ['ok'=>true];
             });
         }
@@ -347,6 +374,7 @@ final class Service {
             foreach($s['ai'] as $day=>$v) if($day<gmdate('Y-m-d',$this->now()-604800)) unset($s['ai'][$day]);
             foreach($s['owner_ai'] ?? [] as $key=>$v)if(substr($key,0,10)<gmdate('Y-m-d',$this->now()-86400))unset($s['owner_ai'][$key]);
             foreach($s['admin_attempts'] ?? [] as $key=>$v)if(substr($key,6,13)<gmdate('Y-m-d-H',$this->now()-3600))unset($s['admin_attempts'][$key]);
+            foreach($s['pending_revocations']??[]as$key=>$item)if(($item['at']??0)<$this->now()-604800)unset($s['pending_revocations'][$key]);
             return ['packages_purged'=>$n];
         });
     }

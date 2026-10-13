@@ -28,12 +28,12 @@ final class Admin {
         $allowed=$this->store->transaction(function(&$s)use($hour,$day){
             foreach(array_keys($s['ai_checks']??[])as$old)if((int)$old<=$hour-24)unset($s['ai_checks'][$old]);
             $dayChecks=array_sum($s['ai_checks']??[]);
-            if(($s['ai_checks'][$hour]??0)>=1||$dayChecks>=3
-                ||($s['ai'][$day]??0)>=min(20,max(0,(int)($this->config['daily_ai_limit']??0))))return false;
+            $settings=$this->config;$settings['daily_ai_limit']=min(20,max(0,(int)($settings['daily_ai_limit']??0)));
+            if(($s['ai_checks'][$hour]??0)>=1||$dayChecks>=3||!reserveAiAllowance($s,$settings,$day))return false;
             $s['ai_checks'][$hour]=($s['ai_checks'][$hour]??0)+1;
-            $s['ai'][$day]=($s['ai'][$day]??0)+1;return true;
+            return true;
         });
-        if(!$allowed)throw new Problem(429,'AI checks are limited to one per hour, three per 24 hours and the shared daily AI allowance. Failed calls count.');
+        if(!$allowed)throw new Problem(429,'AI checks are limited to one per hour, three per 24 hours and the shared daily/cumulative AI allowance. Failed calls count.');
     }
     public function recordAiCheck(bool $passed):void {
         $this->store->transaction(function(&$s)use($passed){$day=gmdate('Y-m-d');$event=$passed?'ai_check_passed':'ai_check_failed';$s['counts'][$day][$event]=($s['counts'][$day][$event]??0)+1;});
@@ -53,6 +53,7 @@ final class Admin {
             $gates=[];foreach(['ai_enabled','checkout_enabled','licence_confirmed','privacy_confirmed','tax_confirmed','merchant_confirmed','production_tests_passed']as$key)$gates[$key]=(bool)($this->config[$key]??false);
             return ['totals'=>['paid_orders'=>$paid,'revoked_orders'=>$revoked,'active_packages'=>$active,'gross_verified_usd'=>$paid*9],
                 'counts'=>$s['counts'],'orders'=>array_slice($orders,0,100),'ai_calls'=>$s['ai'],
+                'ai_allowance'=>['total_used'=>$s['ai_total']??array_sum($s['ai']??[]),'total_limit'=>max(0,(int)($this->config['total_ai_limit']??30))],
                 'jobs'=>['count'=>count($s['jobs']),'checked_at'=>$s['jobs_at']?gmdate('c',$s['jobs_at']):null],
                 'payments_environment'=>($this->config['stripe_live']??false)?'live':'test',
                 'gates'=>$gates,'storage_backend'=>$this->config['storage_backend']??'file',

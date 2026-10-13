@@ -64,7 +64,8 @@ PASS Missing settings consume no provider request
 PASS Repeated AI diagnostics cannot consume another hourly allowance
 PASS Diagnostic credit reservation shares customer daily AI counts
 PASS Zero daily credit allowance prevents diagnostic calls
-AI CHECK RESULT 14 mocked checks passed; no external provider call.
+PASS Owner diagnostics also respect the cumulative pilot allowance
+AI CHECK RESULT 15 mocked checks passed; no external provider call.
 PASS Scheduled cleanup health and private session tests
 PASS Maintenance confirms purged packages and expired sessions
 PASS Expired private sessions removed
@@ -95,7 +96,7 @@ PASS Bounded requests safely succeed or rate-limit
 {
   "requests": 100,
   "concurrency": 1,
-  "p50_ms": 4,
+  "p50_ms": 3,
   "p95_ms": 5,
   "responses": {
     "200": 55,
