@@ -37,7 +37,7 @@ PASS Bounded requests safely succeed or rate-limit
   "requests": 100,
   "concurrency": 1,
   "p50_ms": 3,
-  "p95_ms": 3,
+  "p95_ms": 4,
   "responses": {
     "200": 55,
     "429": 45

@@ -11,6 +11,7 @@ try{
  [$config,$store]=$boot=\ApplyPilot\boot($dir);$admin=new \ApplyPilot\Admin($store,$config);
  if(($_SERVER['HTTPS']??'')!=='on')throw new \ApplyPilot\Problem(503,'HTTPS is required.');
  session_name('applypilot_owner');ini_set('session.use_strict_mode','1');ini_set('session.use_only_cookies','1');
+ session_save_path(\ApplyPilot\privateSessionDirectory($dir,'owner'));ini_set('session.gc_maxlifetime','1800');
  session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>true,'httponly'=>true,'samesite'=>'Strict']);session_start();
  if(!isset($_SESSION['csrf']))$_SESSION['csrf']=bin2hex(random_bytes(32));
  $action=$_GET['action']??'';$method=$_SERVER['REQUEST_METHOD']??'';

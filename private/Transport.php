@@ -56,6 +56,12 @@ function stripe(array $config): callable {
             $method==='POST'?http_build_query($params,'','&',PHP_QUERY_RFC3986):null);
     };
 }
+function privateSessionDirectory(string $dir,string $kind): string {
+    if(!in_array($kind,['customer','owner'],true)) throw new Problem(500,'Invalid session scope.');
+    $path=$dir.'/data/sessions/'.$kind;
+    if(!is_dir($path) && !mkdir($path,0700,true)) throw new Problem(503,'Private sessions are unavailable.');
+    return $path;
+}
 function boot(string $dir): array {
     $dir=realpath($dir) ?: '';
     $root=realpath($_SERVER['DOCUMENT_ROOT'] ?? '') ?: '';

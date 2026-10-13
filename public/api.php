@@ -28,6 +28,7 @@ try {
     $service->rateLimit($_SERVER['REMOTE_ADDR'] ?? 'unknown'); // never trust forwarded IP headers
     ini_set('session.use_strict_mode','1'); ini_set('session.use_only_cookies','1');
     ini_set('session.gc_maxlifetime','86400');
+    session_save_path(\ApplyPilot\privateSessionDirectory($dir,'customer'));
     $path=parse_url($config['base_url'],PHP_URL_PATH) ?: '/';
     session_name('applypilot_session');
     session_set_cookie_params(['lifetime'=>86400,'path'=>rtrim($path,'/').'/','secure'=>true,'httponly'=>true,'samesite'=>'Lax']);
