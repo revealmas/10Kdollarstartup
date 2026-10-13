@@ -4,6 +4,10 @@
 
 The original source kit and its AGENTS.md are still unavailable. Read and inspect them before changing original files or adopting its architecture. Keep this recovery build isolated; merge only after identifying the old paywall, API endpoints, export code and disclosure text. Remove any browser-only generation of full paid output, static paid payloads, localStorage CV persistence and fake live listings. Test both original and changed behaviour.
 
+## Actual preview deployment
+
+Public files are deployed at https://mybillflow.online/. Private server code is extracted in the domain File Manager root at applypilot-server/applypilot-private, outside public_html. No config.php or credentials were uploaded. Use the account’s verified absolute path for APPLYPILOT_PRIVATE_DIR; do not guess it. Owner dashboard credentials, encryption key, API secrets and hourly cleanup must be configured privately before backend activation.
+
 ## Hostinger layout
 
 Use PHP 8.3+ with cURL and OpenSSL. Put public/ files in the selected website's public_html, and private/ files in a sibling applypilot-private directory outside public_html. Copy config.example.php to config.php privately. Create a private 32-byte random encryption key (base64) and configure storage_key; preserve the key securely or stored orders become unreadable. Keep state and locks under a private data/ directory with restrictive permissions. Never place secrets in .htaccess, JavaScript, ZIP archives, logs or chat.
