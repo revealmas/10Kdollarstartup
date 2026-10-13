@@ -1,0 +1,49 @@
+# Integration and deployment
+
+## Source recovery first
+
+The original source kit and its AGENTS.md are still unavailable. Read and inspect them before changing original files or adopting its architecture. Keep this recovery build isolated; merge only after identifying the old paywall, API endpoints, export code and disclosure text. Remove any browser-only generation of full paid output, static paid payloads, localStorage CV persistence and fake live listings. Test both original and changed behaviour.
+
+## Hostinger layout
+
+Use PHP 8.3+ with cURL and OpenSSL. Put public/ files in the selected website's public_html, and private/ files in a sibling applypilot-private directory outside public_html. Copy config.example.php to config.php privately. Create a private 32-byte random encryption key (base64) and configure storage_key; preserve the key securely or stored orders become unreadable. Keep state and locks under a private data/ directory with restrictive permissions. Never place secrets in .htaccess, JavaScript, ZIP archives, logs or chat.
+
+Set APPLYPILOT_PRIVATE_DIR to the private directory's absolute path through hosting configuration. The public .htaccess includes a path-only SetEnv example. Confirm that the host passes this variable to PHP. Configure base_url to the actual HTTPS origin/path; do not trust request Host headers for redirects. Neither config.php nor data/ should be downloadable over HTTP. Ensure sessions persist for 24 hours, and that the web server's HTTPS indicator matches the gateway's check.
+
+Native scripts: private/maintenance.php hourly, private/refresh_jobs.php every six hours, private/metrics.php for owner-only aggregate reports. Run scripts with the account's actual PHP CLI path and absolute private path; do not make them public endpoints. Alert on failed cleanup, provider failures, webhook retries and stale jobs. Backups containing old CV payloads need a documented short retention or deletion policy; encryption alone does not solve retention.
+
+## DeepSeek
+
+User confirmed DeepSeek, not a real-time search API. The adapter calls https://api.deepseek.com/chat/completions server-side using JSON output, bounded input/output, a timeout and an explicit schema. Choose the model available to the user's account after checking provider docs and a synthetic test. Do not assume an obsolete model alias. DeepSeek balance, allowed uses, API-specific retention/training, processor terms, transfer safeguards and budget are still unknown.
+
+Set deepseek_key privately. Begin with synthetic CVs only. Before real applicant processing, complete the processor/transfer review, publish the actual privacy notice and consent details, then enable privacy_confirmed and ai_enabled. Email/link/number removal is partial data minimisation; work history remains identifiable. Applicants must remove names, addresses, IDs, health information and sensitive content. Never claim anonymity or zero retention. The global daily call cap defaults to 20 including failures; confirm a tighter cap against remaining credit. No auto-top-up, uncapped retry or budget increase is enabled.
+
+The model gives analysis, not live job listings. Evidence quotes must exist verbatim in the supplied CV; other factual prose still needs applicant review and synthetic quality testing. Resume/JD prompt injection stays untrusted. Provider errors never expose headers, secrets or response bodies.
+
+## Jobs
+
+Only explicitly reviewed public employer feeds are supported. API accessibility does not itself grant permission to aggregate or republish content. Confirm employer/provider terms, attribution, rate limits and permitted display before enabling each feed. No LinkedIn/Indeed login bypass or protected scraping. No AI-invented listings.
+
+Example feed shape (fill with verified values):
+
+    ['provider'=>'greenhouse', 'board'=>'VERIFIED_BOARD_TOKEN',
+     'employer'=>'Actual employer name', 'permission_reviewed'=>true,
+     'terms_url'=>'Actual permission/terms URL', 'reviewed_at'=>'YYYY-MM-DD']
+
+Supported kinds: greenhouse, lever, lever-eu. The importer links to approved ATS hosts, stores minimal listing metadata and source timestamps, and does not call application-submission APIs. Listings older than 12 hours are hidden. An incomplete refresh does not renew freshness. Large feed responses may hit the 1 MiB response cap; resolve that before enabling a board rather than removing the cap blindly.
+
+## Stripe
+
+Connected account: MAFSAN GLOBAL SOLUTIONS FZC LLC, UAE, connection exposes test mode. Account read reported charges_enabled/payouts_enabled true and no currently-due requirements; that does not prove live mode or product-specific licence clearance. Current descriptor is FOUNDERS ROI. Do not change shared account branding globally without checking its existing uses. Agree an accurate product-specific descriptor/suffix and show the verified complete string before checkout.
+
+Configure test secret and endpoint webhook secret in private config; the connector alone does not supply deployed-server credentials. Use the matching test mode and secret. Register public api.php?action=webhook for checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded and charge.dispute.created. Set Stripe business website, public support and Terms URL before testing terms-of-service consent. Set receipt emails in Stripe. Never switch to live solely because the user has a live account.
+
+USD 900 cents, one line item, quantity one, no subscription/discount/tip. Manual inclusive tax rates are optional by reviewed billing country; validate tax rates in Stripe. Do not silently turn on paid Stripe Tax. Unreviewed countries are blocked; there is no blanket global VAT exemption. Checkout requires a generated package and displayed preview. Idempotency parameters and session binding prevent duplicate creation; expired Checkout sessions require a fresh preview rather than a second charge against the same order. A mismatched actual billing country blocks fulfillment and requires support/refund review; before launch, test jurisdiction controls and ensure the tax handling is correct at payment time.
+
+Fulfillment retrieves current Session details with the server key, verifies paid/complete, USD 900 total, product, order binding, billing country, environment, and browser owner. The return URL is never payment proof. Retry 409 webhook races; monitor persistent ones. Refund/dispute events revoke future download access and cannot be undone by a late payment event. Already-downloaded copies cannot be revoked. Deleting a package while a Checkout session is pending can leave a payment requiring refund; disable that UI during pending checkout or add server-side Session expiration before launch.
+
+## Frontend and verification
+
+All provider data renders via textContent, not HTML. Browser storage contains only an opaque order ID. Private cookie is HttpOnly/Secure/SameSite=Lax and POSTs require CSRF token and matching origin. The free local preview works without the backend and labels itself as a word comparison, not AI or ATS scoring. The sample is labelled as illustrative, not a live vacancy. Paid Word/text exports are created only from the authorised result; PDF uses browser print after verification.
+
+Native verification checklist: storage encryption/tamper/wrong-key and concurrency; direct URL isolation; session fixation/expiry; CSRF/wrong-origin; body limits; provider timeouts/empty/truncated/invented output; actual feed freshness; test Stripe success, abandonment, decline, forged/duplicate/reordered webhooks, mismatch, refund/dispute and lost-cookie support; server quota/cleanup; mobile keyboard and export readability. Finalize real licence/merchant/support/tax/privacy pages before setting production_tests_passed and checkout_enabled. The current example must not be enabled merely by flipping flags.

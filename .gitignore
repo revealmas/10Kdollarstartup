@@ -1,0 +1,10 @@
+private/config.php
+private/data/
+.env
+.env.*
+!.env.example
+node_modules/
+work/
+.supabase/
+.vercel/
+*.log

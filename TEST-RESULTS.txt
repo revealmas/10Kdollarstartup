@@ -1,0 +1,64 @@
+PASS Consent required before AI processing
+PASS Adult confirmation required
+PASS Oversized CV rejected
+PASS Contact details redacted before provider
+PASS Preview contains no full package or original CV
+PASS Unknown provider keys discarded
+PASS Price is exactly USD 9
+PASS Unpaid package cannot be downloaded
+PASS Another browser cannot inspect order
+PASS Another browser cannot download order
+PASS Checkout requires preview acknowledgment
+PASS Terms acceptance required
+PASS Unreviewed billing jurisdiction blocked
+PASS Launch gate checkout_enabled
+PASS Launch gate licence_confirmed
+PASS Launch gate privacy_confirmed
+PASS Launch gate tax_confirmed
+PASS Launch gate merchant_confirmed
+PASS Launch gate production_tests_passed
+PASS Client amount and currency cannot override price
+PASS One-time fixed quantity, no discount or subscription
+PASS Any configured tax is inside the 9 dollar total
+PASS Order-bound Stripe idempotency key
+PASS Repeated checkout reuses same session
+PASS Forged webhook rejected
+PASS Stale signed webhook rejected
+PASS Raw-body modification rejected
+PASS Live webhook rejected by test-mode service
+PASS Payment mismatch rejected: amount_total
+PASS Payment mismatch rejected: currency
+PASS Payment mismatch rejected: mode
+PASS Payment mismatch rejected: status
+PASS Payment mismatch rejected: livemode
+PASS Payment mismatch rejected: client_reference_id
+PASS Payment mismatch rejected: id
+PASS Wrong product rejected
+PASS Actual billing country must match reviewed tax country
+PASS Checkout completion with unpaid status cannot fulfill
+PASS Verified payment unlocks full result
+PASS Duplicate webhook does not duplicate fulfillment
+PASS Paid order cannot create another charge
+PASS Refund revokes package access
+PASS Late payment event cannot restore refunded access
+PASS Refund arriving before binding requires webhook retry
+PASS Contact details redacted before provider
+PASS Deletion removes personal package and preview
+PASS Deleted package inaccessible
+PASS Invented CV evidence rejected
+PASS Contact details redacted before provider
+PASS Daily AI credit-use cap enforced
+PASS AI remains disabled until configured
+PASS Contact details redacted before provider
+PASS Package expires after 24 hours
+PASS Cleanup actually removes expired CV data
+PASS Stale job listings are not returned as fresh
+PASS IP abuse limit enforced
+PASS Wrong owner password rejected
+PASS Owner password verified
+PASS Admin snapshot excludes CV and browser owner secret
+PASS Owner login brute force limit enforced
+PASS Contact details redacted before provider
+PASS Expiring package cannot enter checkout
+RESULT 62 checks passed. MemoryStore and mocked provider calls only.
+
