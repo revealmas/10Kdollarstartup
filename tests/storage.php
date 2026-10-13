@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/../private/Core.php';
+require_once __DIR__.'/../private/IntegrationSettings.php';
 use ApplyPilot\EncryptedFileStore;
 $dir=sys_get_temp_dir().'/applypilot-test-'.bin2hex(random_bytes(8));mkdir($dir,0700);
 $file=$dir.'/state.enc';$key=base64_encode(random_bytes(32));$store=new EncryptedFileStore($file,$key);
@@ -19,5 +20,14 @@ if(function_exists('pcntl_fork')){
  foreach($pids as $pid){pcntl_waitpid($pid,$status);check(pcntl_wexitstatus($status)===0,'Concurrent writer exited successfully');}
  check($store->transaction(fn(&$s)=>$s['counter'])===100,'Four writers: no lost updates across 100 commits');
 }else{echo 'SKIP pcntl concurrency unavailable'.PHP_EOL;}
+$settings=new ApplyPilot\IntegrationSettings($dir,['storage_key'=>$key]);
+$fixture='rk_test_'.str_repeat('A',24);
+$status=$settings->save(['stripe_key'=>$fixture,'deepseek_model'=>'synthetic-model']);
+check($status['stripe_test_configured']===true&&!str_contains(json_encode($status),$fixture),'Settings response excludes API credential');
+check(!str_contains(file_get_contents($dir.'/data/integrations.enc'),$fixture),'API credentials encrypted at rest');
+check($settings->save(['stripe_key'=>''])['stripe_test_configured']===true,'Blank input preserves configured credential');
+try{$settings->save(['stripe_key'=>'rk_live_'.str_repeat('B',24)]);throw new RuntimeException('live key accepted');}catch(ApplyPilot\Problem $e){check($e->status===422,'Owner setup rejects live credentials');}
+check($settings->read()['stripe_key']===$fixture,'Invalid update leaves previous credential intact');
+foreach(glob($dir.'/data/*') as $f)unlink($f);rmdir($dir.'/data');
 foreach(glob($dir.'/*') as $f)unlink($f);rmdir($dir);
 echo 'Storage checks complete.'.PHP_EOL;

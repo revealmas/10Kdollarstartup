@@ -1,5 +1,6 @@
 PASS PHP parser private/Admin.php
 PASS PHP parser private/Core.php
+PASS PHP parser private/IntegrationSettings.php
 PASS PHP parser private/SupabaseStore.php
 PASS PHP parser private/Transport.php
 PASS PHP parser private/config.example.php
@@ -17,6 +18,11 @@ PASS Encrypted storage round trip
 PASS Wrong encryption key rejected
 PASS Authenticated encryption rejects tampering
 SKIP pcntl concurrency unavailable
+PASS Settings response excludes API credential
+PASS API credentials encrypted at rest
+PASS Blank input preserves configured credential
+PASS Owner setup rejects live credentials
+PASS Invalid update leaves previous credential intact
 Storage checks complete.
 PASS Gateway bootstrap
 PASS Secure HttpOnly cookie
@@ -36,12 +42,12 @@ PASS Bounded requests safely succeed or rate-limit
 {
   "requests": 100,
   "concurrency": 1,
-  "p50_ms": 3,
-  "p95_ms": 4,
+  "p50_ms": 4,
+  "p95_ms": 6,
   "responses": {
     "200": 55,
     "429": 45
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 29 checks passed. Native pcntl/Hostinger/provider tests still pending.
+RESULT 30 checks passed. Native pcntl/Hostinger/provider tests still pending.

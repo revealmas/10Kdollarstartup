@@ -70,6 +70,11 @@ function boot(string $dir): array {
     $config=require $dir.'/config.php';
     if(!is_array($config) || !str_starts_with($config['base_url'] ?? '', 'https://'))
         throw new Problem(503,'HTTPS configuration is required.');
+    if(is_file($dir.'/data/integrations.enc')){
+        require_once __DIR__.'/IntegrationSettings.php';
+        $settings=(new IntegrationSettings($dir,$config))->read();
+        foreach($settings as $name=>$value)if($value!=='')$config[$name]=$value;
+    }
     $storage=realpath(dirname($config['storage_file'])) ?: dirname($config['storage_file']);
     if($root!=='' && ($storage===$root || str_starts_with($storage,$root.DIRECTORY_SEPARATOR)))
         throw new Problem(503,'Private storage must be outside the web root.');

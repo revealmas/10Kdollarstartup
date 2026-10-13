@@ -6,7 +6,7 @@ The original source kit and its AGENTS.md are still unavailable. Read and inspec
 
 ## Actual preview deployment
 
-Public files are deployed at https://mybillflow.online/. Private server code is extracted in the domain File Manager root at applypilot-server/applypilot-private, outside public_html. No config.php or credentials were uploaded. Use the account’s verified absolute path for APPLYPILOT_PRIVATE_DIR; do not guess it. Owner dashboard credentials, encryption key, API secrets and hourly cleanup must be configured privately before backend activation.
+Public files are deployed at https://mybillflow.online/. Private server code is extracted in the domain File Manager root at applypilot-server/applypilot-private, outside public_html. A one-time CLI initializer generated config.php, encryption key and owner credentials privately on the server; the initializer and its temporary job were removed. The verified path is /home/u455773903/domains/mybillflow.online/applypilot-server/applypilot-private, set through path-only .htaccess configuration. Customer and owner sessions use separate private directories. Hourly cleanup is configured; its first scheduled run must be verified. DeepSeek and Stripe server credentials remain missing.
 
 ## Hostinger layout
 

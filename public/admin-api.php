@@ -29,6 +29,12 @@ try{
  }
  if(($_SESSION['until']??0)<=time())throw new \ApplyPilot\Problem(401,'Owner sign-in required.');
  if($action==='logout'){$_SESSION=[];session_destroy();answer(200,['ok'=>true]);}
+ if(in_array($action,['integration-status','save-integrations'],true)){
+  require_once $dir.'/IntegrationSettings.php';
+  $settings=new \ApplyPilot\IntegrationSettings($dir,$config);session_write_close();
+  if($action==='save-integrations'&&!is_array($input))throw new \ApplyPilot\Problem(422,'Invalid settings.');
+  answer(200,$action==='save-integrations'?$settings->save($input):$settings->status());
+ }
  if($action==='snapshot'){session_write_close();answer(200,$admin->snapshot());}
  throw new \ApplyPilot\Problem(404,'Unknown action.');
 }catch(\ApplyPilot\Problem $e){answer($e->status,['error'=>$e->getMessage()]);}catch(\Throwable $e){answer(503,['error'=>'Owner dashboard temporarily unavailable.']);}

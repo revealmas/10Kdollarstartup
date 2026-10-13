@@ -25,10 +25,14 @@ try{
  check((await req('webhook',{body:{id:'forged'}})).response.status===400,'HTTP forged webhook denied');
  const a=await req('bootstrap',{admin:true,method:'GET'});cookie=a.response.headers.get('set-cookie').split(';')[0];csrf=a.body.csrf;
  check((await req('snapshot',{admin:true})).response.status===401,'Unauthenticated admin data denied');
+ check((await req('save-integrations',{admin:true,body:{stripe_key:'rk_test_'+ 'A'.repeat(24)}})).response.status===401,'Anonymous credential configuration denied');
  check((await req('login',{admin:true,body:{password:'wrong'}})).response.status===401,'Wrong owner credential denied');
  const login=await req('login',{admin:true,body:{password}});check(login.response.status===200,'Owner login succeeds');csrf=login.body.csrf;cookie=login.response.headers.get('set-cookie').split(';')[0];
  const snap=await req('snapshot',{admin:true});check(snap.response.status===200&&!!snap.body.gates,'Authenticated operational dashboard');
  check(!JSON.stringify(snap.body).includes(password),'Owner password absent from dashboard');
+ const setting=await req('save-integrations',{admin:true,body:{stripe_key:'rk_test_'+'A'.repeat(24)}});
+ check(setting.response.status===200&&setting.body.stripe_test_configured===true&&!JSON.stringify(setting.body).includes('rk_test_'),'Owner settings save without returning credential');
+ check((await req('save-integrations',{admin:true,body:{stripe_key:'rk_live_'+'B'.repeat(24)}})).response.status===422,'Live key denied by test setup');
  await req('logout',{admin:true});check((await req('snapshot',{admin:true})).response.status===401,'Logout revokes owner session');
  // Bounded local-only load, no provider calls and no public stress traffic.
  const latencies=[];const statuses=[];for(let batch=0;batch<10;batch++)await Promise.all(Array.from({length:10},async()=>{const start=performance.now();const r=await fetch(base+'/api.php?action=jobs');latencies.push(performance.now()-start);statuses.push(r.status);}));
