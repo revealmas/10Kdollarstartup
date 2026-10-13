@@ -1,6 +1,14 @@
 # UAE commercial launch review — checked 13 October 2026
 
-This is an evidence review, not confirmation that MAFSAN's licence permits this activity. No licence document, issuer, activity codes or registered address has been supplied. The Stripe connection identifies MAFSAN GLOBAL SOLUTIONS FZC LLC in AE; that does not identify its licensing authority or permitted activity.
+This is an evidence review, not confirmation that MAFSAN's licence permits ApplyPilot. The owner supplied the following business facts on 13 October 2026; these have not been independently verified against a licence or FTA record:
+
+- Trade name: **MAFSAN GLOBAL SOLUTIONS FZC-LLC**.
+- Registered business address: **CWS-2V-226580, 26th Floor, Amber Gem Tower, Ajman, United Arab Emirates**.
+- VAT: owner reports not registered and currently no earnings.
+- EmaraTax: owner reports registration, but the tax type and certificate are not supplied. Do not infer a VAT TRN or confirmed Corporate Tax registration from an EmaraTax account alone.
+- Licence issuer, listed activities/codes, current validity and support email: still missing. The address and entity suffix do not establish the licensing authority or allowed software/online-commerce scope.
+
+The Stripe account label differs in punctuation (MAFSAN GLOBAL SOLUTIONS FZC LLC). The product pages now use the owner's exact trade name; live Stripe entity settings were not changed. Match the final merchant records to the actual licence before launch.
 
 ## Licence scope and recruitment boundary
 
@@ -18,7 +26,7 @@ Determine applicability with MAFSAN's actual licensing authority and TDRA before
 
 ## VAT and global sales
 
-The [FTA VAT registration guidance](https://tax.gov.ae/en/taxes/Vat/vat.topics/registration.for.vat.aspx) sets mandatory registration at AED 375,000 of taxable supplies/imports in the previous 12 months or anticipated next 30 days; voluntary registration can apply above AED 187,500. Evaluate MAFSAN's whole taxable business, not only ApplyPilot. Existing registration/TRN and combined turnover are unknown.
+The [FTA VAT registration guidance](https://tax.gov.ae/en/taxes/Vat/vat.topics/registration.for.vat.aspx) sets mandatory registration at AED 375,000 of taxable supplies/imports in the previous 12 months or anticipated next 30 days; voluntary registration can apply above AED 187,500. Evaluate MAFSAN's whole taxable business, not only ApplyPilot. Owner reports no UAE VAT registration and no current earnings. No VAT TRN is provided. Still assess all taxable supplies/imports across MAFSAN and anticipated next-30-day activity, rather than using profit or ApplyPilot turnover alone. The [FTA EmaraTax description](https://tax.gov.ae/en/emaratax.aspx) describes a multi-tax service portal; an EmaraTax account alone is not a VAT registration certificate.
 
 Do not charge tax without confirming registration and tax treatment. Do not assume exported online services are universally zero-rated, or that foreign B2C digital sales have no local obligations. A global audience can create destination tax/consumer duties even when UAE registration thresholds are not met. Review customer-location evidence, UAE versus export supply treatment, invoices and applicable target jurisdictions before enabling sales there.
 
@@ -40,12 +48,12 @@ Free local review is available without uploading text. AI stays disabled until t
 
 ## Launch evidence still needed
 
-- Current licence/activity schedule, issuing authority, registered address; confirmation of digital software and online sale scope.
+- Current licence/activity schedule, issuing authority and validity; confirmation of digital software and online sale scope. Trade name/address are owner-supplied, awaiting licence reconciliation.
 - TDRA/issuer determination or applicable approval, including domain suitability.
-- MAFSAN VAT status/TRN, total turnover and agreed inclusive-tax policy; target-country tax and consumer assessment.
-- Verified Stripe product/website/support/descriptor setup and deployed test credentials/webhook secret.
-- DeepSeek API model, credit/budget, secure key, processor/retention/transfer evidence.
-- Original source kit for takeover audit; actual Hostinger deployment/runtime tests and end-to-end delivery.
+- Confirm owner-declared non-VAT-registration, entity-wide taxable supplies/imports and forecast, inclusive-tax policy and target-country tax/consumer assessment. No VAT collection or zero-rating assumption is authorized.
+- Final Stripe product/website/support/descriptor review and actual paid fulfillment/refund/webhook tests. Restricted test key/webhook are encrypted on Hostinger; actual unpaid sandbox Checkout passed.
+- DeepSeek processor/retention/transfer evidence, launch monetary usage cap and broader quality checks. Saved deepseek-flash key passed one synthetic test; owner-reported balance was $2.50.
+- Original source kit for takeover audit; production capacity, scheduled cleanup confirmation, exports and actual paid end-to-end delivery. Hostinger access controls and synthetic AI/unpaid Stripe checks passed separately.
 - Monitored support/refund/data-rights channel, final legal disclosures and social account permissions.
 
 None of these flags are substitutes for the evidence they represent.
