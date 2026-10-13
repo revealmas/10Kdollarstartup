@@ -70,3 +70,6 @@ Free local review is available without uploading text. AI stays disabled until t
 - Monitored support/refund/data-rights channel, final legal disclosures and social account permissions.
 
 None of these flags are substitutes for the evidence they represent.
+
+### API-specific source review — 13 October 2026
+DeepSeek [Open Platform terms](https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html), effective 29 April 2026, permit downstream applications, require end-user processing disclosures/legal basis and AI-error disclosure, and prohibit exposing keys or implying brand endorsement. Section 5.5 excludes downstream-user processing rules from the linked consumer privacy notice. The reviewed API terms do not specify a contractual prompt-retention period, no-training commitment, or UAE transfer safeguard. Request those details from the provider before real CV processing; an unsent inquiry is prepared. These terms are not company licence clearance.

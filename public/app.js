@@ -9,7 +9,7 @@ async function setup(){
     if(cfg.ai_enabled){$('service-note').textContent='Free discovery and previews. Optional full application bundle: USD $9 total, paid only after your preview.';$('ai-consent').hidden=false;$('prepare').disabled=false;$('prepare').textContent='Prepare my AI preview ↗';}
     if(cfg.checkout_enabled){$('checkout').disabled=false;$('checkout').textContent='Unlock bundle · USD $9 ↗';}
     for(const country of cfg.billing_countries){const option=document.createElement('option');option.value=country;option.textContent=country;$('country').append(option);}
-    $('merchant-disclosure').textContent=`Seller: MAFSAN GLOBAL SOLUTIONS FZC LLC. Support: ${cfg.support_email||'not configured yet'}. Your card statement will show: ${cfg.merchant_descriptor||'to be confirmed before checkout'}.`;
+    $('merchant-disclosure').textContent=`Seller: MAFSAN GLOBAL SOLUTIONS FZC-LLC. Support: ${cfg.support_email||'not configured yet'}. Your card statement will show: ${cfg.merchant_descriptor||'to be confirmed before checkout'}.`;
     await jobs('');
   }catch(e){/* Local preview works without backend. No CV is sent automatically. */}
 }
