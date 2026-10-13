@@ -18,7 +18,7 @@ Native scripts: private/maintenance.php hourly, private/refresh_jobs.php every s
 
 ## DeepSeek
 
-User confirmed DeepSeek, not a real-time search API. The adapter calls https://api.deepseek.com/chat/completions server-side using JSON output, bounded input/output, a timeout and an explicit schema. Choose the model available to the user's account after checking provider docs and a synthetic test. Do not assume an obsolete model alias. DeepSeek balance, allowed uses, API-specific retention/training, processor terms, transfer safeguards and budget are still unknown.
+User confirmed DeepSeek, not a real-time search API. The adapter calls https://api.deepseek.com/chat/completions server-side using JSON output, bounded input/output, a timeout and an explicit schema. Choose the model available to the user's account after checking provider docs and a synthetic test. Do not assume an obsolete model alias. The owner reported $2.50 available credit. Allowed uses, API-specific retention/training, processor terms, transfer safeguards and launch monetary budget still need review.
 
 Set deepseek_key privately. Begin with synthetic CVs only. Before real applicant processing, complete the processor/transfer review, publish the actual privacy notice and consent details, then enable privacy_confirmed and ai_enabled. Email/link/number removal is partial data minimisation; work history remains identifiable. Applicants must remove names, addresses, IDs, health information and sensitive content. Never claim anonymity or zero retention. The global daily call cap defaults to 20 including failures; confirm a tighter cap against remaining credit. No auto-top-up, uncapped retry or budget increase is enabled.
 
