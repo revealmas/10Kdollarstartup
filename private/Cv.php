@@ -32,7 +32,13 @@ function validateCv(array $cv,string $source):array{
         if(!is_array($cv[$field]??null)||count($cv[$field])>$max)throw new Problem(502,'The CV structure could not be validated.');
     foreach($cv['skills']as$item){
         if(!is_array($item))throw new Problem(502,'Invalid CV skill.');$quote=cvEvidence($item['quote']??null,$source,2);$text=cvTextValue($item['text']??null,2,90);
-        if(!preg_match('/(?<![\pL\pN])'.preg_quote($text,'/').'(?![\pL\pN])/ui',$quote))throw new Problem(502,'A CV skill was not present in its source evidence.');
+        $pattern='/(?<![\pL\pN])'.preg_quote($text,'/').'(?![\pL\pN])/ui';
+        if(!preg_match($pattern,$quote)){
+            // Repair a misassigned citation only when the exact skill itself occurs
+            // in the submitted CV. Never import a skill from the job description.
+            if(!preg_match($pattern,$source,$literal))throw new Problem(502,'A CV skill was not present in its source evidence.');
+            $quote=$literal[0];
+        }
         $out['skills'][]=['text'=>$text,'quote'=>$quote];
     }
     $boundaries=[];

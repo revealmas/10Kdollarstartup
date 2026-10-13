@@ -51,6 +51,13 @@ final class AiCheck {
             $shape=[];$cached=$this->diagnostics?->transaction(fn(&$s)=>$s['synthetic_ai_report']['report']??[]);
             if(is_array($cached)){
                 $inspect=function($value,$field,$min,$max)use(&$shape){if(!is_string($value))$shape[]=$field.' is not text';elseif(strlen(trim($value))<$min||strlen($value)>$max)$shape[]=$field.' length '.strlen(trim($value)).' (expected '.$min.'..'.$max.')';};
+                // Fixed synthetic fixture only; never inspect customer reports here.
+                foreach($cached['cv']['skills']??[]as$i=>$skill){
+                    if(is_array($skill)&&is_string($skill['text']??null)){
+                        $text=substr($skill['text'],0,90);
+                        if(!preg_match('/(?<![\pL\pN])'.preg_quote($text,'/').'(?![\pL\pN])/ui',$fixture['resume']))$shape[]='synthetic skill '.$i.' not literal in fixture: '.preg_replace('/[^a-zA-Z0-9 ,&()\/-]/','',$text);
+                    }
+                }
                 $inspect($cached['summary']??null,'summary',20,1000);
                 foreach($cached['strengths']??[]as$i=>$item)if(is_array($item)){$inspect($item['quote']??null,'strength quote '.$i,10,500);$inspect($item['reason']??null,'strength reason '.$i,10,700);}
                 foreach(['gaps','interview_questions','tips']as$field)foreach($cached[$field]??[]as$i=>$value)$inspect($value,$field.' '.$i,10,1000);
