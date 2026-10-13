@@ -25,14 +25,14 @@ $config=array_merge($config,['storage_key'=>'test-only','stripe_webhook_secret'=
     'licence_confirmed'=>true,'tax_confirmed'=>true,'merchant_confirmed'=>true,'production_tests_passed'=>true,
     'support_email'=>'support@example.com','merchant_descriptor'=>'MAFSAN APPLYPILOT','country_tax_rates'=>['AE'=>'']]);
 $cvFixture=ApplyPilot\syntheticCvFixture();$resume=$cvFixture['resume'].' Contact candidate@example.com or +971 50 123 4567.';
-$job='A project coordinator role requiring supplier communication, reporting, schedule tracking and experience supporting stakeholder updates.';
+$job=$cvFixture['job_description'];
 $report=['summary'=>'Your supplied CV shows relevant coordination experience. Verify the posting requirements before applying.',
     'strengths'=>[['quote'=>'Coordinated supplier communication and weekly delivery schedules.','reason'=>'This is relevant to supplier coordination in the posting.'],
         ['quote'=>'Prepared monthly progress reports using Excel.','reason'=>'This provides evidence of relevant reporting exposure.']],
     'gaps'=>['The CV does not evidence the employer’s specific scheduling tools.','Verify any location and work authorisation requirements.'],
     'interview_questions'=>['How did you coordinate supplier delivery schedules?','How did you prepare progress reporting?'],
     'tips'=>['Review the employer’s current role requirements before submitting.','Explain only experience you can substantiate.']];
-$report['cv']=$cvFixture['cv'];
+$report['cv']=$cvFixture['cv'];$report['application_pack']=$cvFixture['application_pack'];
 $store=new MemoryStore(); $session=[]; $stripeCalls=[];
 $stripe=function($method,$path,$params,$key)use(&$session,&$stripeCalls){
     $stripeCalls[]=[$method,$path,$params,$key];
@@ -54,6 +54,8 @@ fails(fn()=>$svc->prepare(array_merge($input,['resume'=>str_repeat('x',18001)]),
 $p=$svc->prepare($input,$owner); $id=$p['order_id'];
 ok(!isset($p['package']) && !isset($p['preview']['interview_questions']) && !isset($p['preview']['original_cv']),'Preview contains no full package or original CV');
 ok(!isset($store->data['orders'][$id]['package']['analysis']['paid_secret']),'Unknown provider keys discarded');
+ok(!isset($p['preview']['application_pack'])&&!str_contains(json_encode($p['preview']),$cvFixture['application_pack']['cover_letter'][0]['text'])&&!str_contains(json_encode($p['preview']),$cvFixture['application_pack']['interview_answers'][0]['answer']),'Free preview withholds full letter and interview answers');
+ok($p['preview']['cv_example']['draft']===$store->data['orders'][$id]['package']['application_pack']['changes'][0]['revised'],'Preview exactly matches private prepared edit');
 ok($p['price']['total']===9 && $p['price']['currency']==='USD','Price is exactly USD 9');
 fails(fn()=>$svc->result($id,$owner),402,'Unpaid package cannot be downloaded');
 fails(fn()=>$svc->status($id,'attacker'),404,'Another browser cannot inspect order');

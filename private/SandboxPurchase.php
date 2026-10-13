@@ -23,9 +23,9 @@ final class SandboxPurchase {
             'gaps'=>['This synthetic fixture does not evidence SAP experience.'],
             'interview_questions'=>['How did you maintain delivery schedules and project records?'],
             'tips'=>['Synthetic QA only. Do not submit this fixture to an employer.']];
-        $report['cv']=$fixture['cv'];
+        $report['cv']=$fixture['cv'];$report['application_pack']=$fixture['application_pack'];
         $service=new Service($memory,$c,fn()=> $report,$this->gateway);
-        $result=$service->prepare(['resume'=>$resume,'job_description'=>'Synthetic coordinator posting for QA only, requiring supplier communication, reporting and SAP experience. No employer or real vacancy is represented.','consent'=>true,'adult'=>true],$owner);
+        $result=$service->prepare(['resume'=>$resume,'job_description'=>$fixture['job_description'],'consent'=>true,'adult'=>true],$owner);
         $id=$result['order_id'];$order=$memory->transaction(fn(&$s)=>$s['orders'][$id]);$order['source']='sandbox-qa';
         $this->store->transaction(function(&$s)use($id,$order){$s['orders'][$id]=$order;$day=gmdate('Y-m-d');$s['counts'][$day]['sandbox_preview_created']=($s['counts'][$day]['sandbox_preview_created']??0)+1;});
         // The fixture's mock AI allowance stays in memory. No provider call occurs.

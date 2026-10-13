@@ -87,6 +87,7 @@ function redact(string $text): string {
     return preg_replace_callback('/(?<!\w)\+?\d[\d ().-]{7,}\d(?!\w)/',fn($m)=>strlen(preg_replace('/\D/','',$m[0]))<9?$m[0]:'[number removed]',$text);
 }
 require_once __DIR__.'/Cv.php';
+require_once __DIR__.'/ApplicationPack.php';
 function reportListText($value,string $field):string {
     if(is_string($value))return boundedText($value,10,1000);
     if(!is_array($value))throw new Problem(502,'The analysis could not be validated. No payment is required.');
@@ -171,18 +172,17 @@ final class Service {
             return reserveAiAllowance($s,$this->config,$day);
         });
         if (!$allowed) throw new Problem(429,'The preparation allowance has been reached. Free jobs remain available.');
-        $report=validateReport(($this->ai)($resume,$job),$resume);
+        $raw=($this->ai)($resume,$job);
+        $report=validateReport($raw,$resume);
         if(!isset($report['cv']))throw new Problem(502,'The provider did not produce a validated CV draft. No payment is required.');
+        $pack=validateApplicationPack($raw['application_pack']??null,$report['cv'],$resume,$job);
         $id=bin2hex(random_bytes(16));
         // Build before checkout; a failed AI call can never leave a paid empty order.
         $cv=$report['cv'];unset($report['cv']);
-        $package=['original_cv'=>$resume, 'cv'=>$cv,'analysis'=>$report,
-            'cover_letter_template'=>"Dear Hiring Team,\n\nI am interested in the role described in your posting. My CV includes:\n" .
-                implode("\n",array_map(fn($x)=>'• '.$x['quote'],$report['strengths'])) .
-                "\n\nI would welcome an opportunity to discuss how this experience relates to your requirements.\n\nKind regards,\n[Add your name locally]",
+        $package=['original_cv'=>$resume,'cv'=>$cv,'analysis'=>$report,'application_pack'=>$pack,
             'notice'=>'AI assistance can contain mistakes. Review every statement before applying. This is digital CV assistance, not recruitment or a promise of employment.'];
         $preview=['summary'=>$report['summary'],'strengths'=>array_slice($report['strengths'],0,2),
-            'gaps'=>array_slice($report['gaps'],0,2),'label'=>'AI guidance, not an ATS score or verified hiring assessment','cv_example'=>isset($cv['experience'][0]['bullets'][0])?['original'=>$cv['experience'][0]['bullets'][0]['quote'],'draft'=>$cv['experience'][0]['bullets'][0]['text']]:null,'cv_readiness'=>['ready'=>!$cv['missing_details'],'missing_details'=>$cv['missing_details'],'experience_entries'=>count($cv['experience']),'education_entries'=>count($cv['education'])]];
+            'gaps'=>array_slice($report['gaps'],0,2),'label'=>'AI guidance, not an ATS score or verified hiring assessment','cv_example'=>['original'=>$pack['changes'][0]['original'],'draft'=>$pack['changes'][0]['revised'],'why'=>$pack['changes'][0]['why'],'job_quote'=>$pack['changes'][0]['job_quote']],'deliverables'=>['interview_answers'=>count($pack['interview_answers']),'actions'=>count($pack['action_plan']),'cv_changes'=>count($pack['changes'])],'cv_readiness'=>['ready'=>!$cv['missing_details'],'missing_details'=>$cv['missing_details'],'experience_entries'=>count($cv['experience']),'education_entries'=>count($cv['education'])]];
         $this->store->transaction(function(&$s)use($id,$owner,$package,$preview){
             $s['orders'][$id]=['id'=>$id,'owner'=>hash('sha256',$owner),'created'=>$this->now(),
                 'expires'=>$this->now()+86400,'package'=>$package,'preview'=>$preview,'preview_seen'=>false,
@@ -191,7 +191,7 @@ final class Service {
             $this->count($s,'preview_created');
         });
         return ['order_id'=>$id,'preview'=>$preview,'price'=>['currency'=>'USD','total'=>9],
-            'expires_in_hours'=>24,'paid_contents'=>['Job-specific CV draft','CV Word/PDF/text exports','Full analysis','Cover-letter template','Interview prompts']];
+            'expires_in_hours'=>24,'paid_contents'=>['Job-specific CV draft','CV Word/PDF/text exports','Full analysis','Tailored cover letter','Evidence-based interview answers','Requirement action plan','Explained CV edits']];
     }
     public function acknowledgePreview(string $id,string $owner): array {
         return $this->store->transaction(function(&$s)use($id,$owner){

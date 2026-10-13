@@ -18,12 +18,12 @@ $provider=ApplyPilot\deepseek($config,function($url,$method,$headers,$body)use(&
    'gaps'=>['SAP experience is not evidenced by this fixture.'],
    'interview_questions'=>['How did you maintain delivery schedules and project records?'],
    'tips'=>['Review requirements and avoid claiming SAP experience without evidence.'],
-   'cv'=>$cvFixture['cv'],'unexpected'=>'must not appear in the returned preview'])]]]];
+   'application_pack'=>$cvFixture['application_pack'],'cv'=>$cvFixture['cv'],'unexpected'=>'must not appear in the returned preview'])]]]];
 });
 $result=(new AiCheck($config,$provider))->run();
 check($calls===1&&$result['ok']===true,'AI diagnostic uses one fixed synthetic provider call');
 check($request['url']==='https://api.deepseek.com/chat/completions'&&$request['method']==='POST','AI adapter calls the fixed HTTPS provider endpoint');
-check($request['body']['thinking']['type']==='disabled'&&$request['body']['max_tokens']===4500&&$request['body']['stream']===false,'Bounded non-thinking JSON request avoids default reasoning cost');
+check($request['body']['thinking']['type']==='disabled'&&$request['body']['max_tokens']===6000&&$request['body']['stream']===false,'Bounded non-thinking JSON request avoids default reasoning cost');
 check($request['body']['response_format']['type']==='json_object','Provider request requires structured JSON');
 check(str_contains($request['body']['messages'][1]['content'],'Synthetic CV fixture only'),'Diagnostic input contains synthetic fixture only');
 check(!str_contains(json_encode($result),'synthetic-key-for-tests-only')&&!str_contains(json_encode($result),'reasoning_content')&&!str_contains(json_encode($result),'must not appear'),'Diagnostic response excludes credentials, reasoning and unexpected provider fields');

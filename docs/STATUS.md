@@ -1,3 +1,7 @@
+## 14 October: application pack upgrade
+
+See [VALUE-PACK-RELEASE.md](VALUE-PACK-RELEASE.md) for the current product and verification scope. Older entries below are historical and must not be used as current feature or test claims.
+
 # Actual status
 
 Completed locally: responsive recovery UI, free local CV review, official employer board links, DeepSeek adapter, USD $9 payment/fulfillment module, job importer skeleton, storage/deletion/cleanup code, Word/text/PDF export paths, aggregate metrics, preview legal/support pages, security tests and launch review.

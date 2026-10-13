@@ -1,12 +1,14 @@
 import {zipXml} from './docx.js?v=cv-2';
 const xml=t=>String(t).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'');
-export function cvDocxBytes(cv,contact,{example=false}={}){
+export function cvDocxBytes(cv,contact,{example=false,letter=null}={}){
  const parts=[];const p=(text,style='Normal')=>{if(text)parts.push(`<w:p><w:pPr><w:pStyle w:val="${style}"/></w:pPr><w:r><w:t xml:space="preserve">${xml(text)}</w:t></w:r></w:p>`);};
  p(contact.name||'Your name','Title');p(cv.headline,'Subtitle');p([contact.location,contact.email,contact.phone,contact.website].filter(Boolean).join(' | '),'Contact');
+ if(letter){for(const text of letter)p(text); }else{
  p('Professional Summary','Heading1');p(cv.summary.text);
  if(cv.experience.length)p('Professional Experience','Heading1');for(const j of cv.experience){p(j.title||'Relevant experience','Heading2');p([j.company,j.dates].filter(Boolean).join(' | '),'Contact');for(const b of j.bullets)p('• '+b.text,'Bullet');}
  if(cv.skills.length){p('Skills','Heading1');p(cv.skills.map(s=>s.text).join(' • '));}
  if(cv.education.length){p('Education','Heading1');for(const e of cv.education){p(e.qualification,'Heading2');p([e.institution,e.dates].filter(Boolean).join(' | '),'Contact');}}
+ }
  if(example)p('Fictional design example. All candidate details are synthetic.','Example');
  const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
  const style=(id,name,body)=>`<w:style w:type="paragraph" w:styleId="${id}"${id==='Normal'?' w:default="1"':''}><w:name w:val="${name}"/>${id==='Normal'?'':'<w:basedOn w:val="Normal"/>'}${body}</w:style>`;

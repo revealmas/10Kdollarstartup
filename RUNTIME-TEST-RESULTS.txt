@@ -1,5 +1,6 @@
 PASS PHP parser private/Admin.php
 PASS PHP parser private/AiCheck.php
+PASS PHP parser private/ApplicationPack.php
 PASS PHP parser private/Core.php
 PASS PHP parser private/Cv.php
 PASS PHP parser private/IntegrationSettings.php
@@ -16,6 +17,7 @@ PASS PHP parser private/refresh_jobs.php
 PASS PHP parser public/admin-api.php
 PASS PHP parser public/api.php
 PASS PHP parser tests/ai-check.php
+PASS PHP parser tests/application-pack.php
 PASS PHP parser tests/core.php
 PASS PHP parser tests/maintenance.php
 PASS PHP parser tests/router.php
@@ -79,11 +81,14 @@ PASS Invented CV evidence rejects the diagnostic
 PASS Truncated provider output rejects the diagnostic without retries
 PASS Missing AI configuration fails before the provider
 PASS Missing settings consume no provider request
-PASS Repeated AI diagnostics cannot consume another hourly allowance
+PASS Repeated AI diagnostics cannot consume more than two hourly calls
 PASS Diagnostic credit reservation shares customer daily AI counts
 PASS Zero daily credit allowance prevents diagnostic calls
 PASS Owner diagnostics also respect the cumulative pilot allowance
-AI CHECK RESULT 15 mocked checks passed; no external provider call.
+PASS Cached synthetic draft revalidates without another provider call
+PASS No cached draft cannot trigger an implicit provider retry
+PASS Diagnostic errors use fixed allowlisted messages only
+AI CHECK RESULT 18 mocked checks passed; no external provider call.
 PASS Scheduled cleanup health and private session tests
 PASS Maintenance confirms purged packages and expired sessions
 PASS Expired private sessions removed
@@ -115,11 +120,11 @@ PASS Bounded requests safely succeed or rate-limit
   "requests": 100,
   "concurrency": 1,
   "p50_ms": 4,
-  "p95_ms": 4,
+  "p95_ms": 5,
   "responses": {
     "200": 55,
     "429": 45
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 44 checks passed. Native concurrency and actual Hostinger/provider tests are recorded separately; this local runner makes no external provider calls.
+RESULT 46 checks passed. Native concurrency and actual Hostinger/provider tests are recorded separately; this local runner makes no external provider calls.

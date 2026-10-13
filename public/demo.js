@@ -1,0 +1,16 @@
+import {example} from './pack-example-data.js';
+import {contact} from './cv-example-data.js';
+import {renderApplicationPack,preparationText,saveText} from './pack-view.js';
+import {renderCv} from './cv-view.js';
+import {downloadCvDocx} from './cv-docx.js?v=pack-1';
+import {downloadCvPdf} from './cv-pdf.js?v=pack-1';
+import {downloadLetter} from './letter-export.js';
+const $=id=>document.getElementById(id),pack=example.application_pack;
+$('demo-job').textContent=example.job_description;$('demo-source').textContent=example.resume;
+$('demo-before').textContent=pack.changes[1].original;$('demo-after').textContent=pack.changes[1].revised;$('demo-why').textContent=pack.changes[1].why;
+$('demo-pack').append(renderApplicationPack(pack,contact));$('demo-cv').append(renderCv(example.cv,contact));
+$('demo-word').addEventListener('click',()=>downloadCvDocx(example.cv,contact));
+const run=fn=>async()=>{try{await fn();$('demo-status').textContent='Fictional example downloaded. Review your own documents before applying.';}catch{$('demo-status').textContent='The PDF could not be generated. Please use the Word download.';}};
+$('demo-pdf').addEventListener('click',run(()=>downloadCvPdf(example.cv,contact)));
+for(const type of ['word','pdf'])$('demo-letter-'+type).addEventListener('click',run(()=>downloadLetter(pack,contact,type==='word'?'docx':'pdf')));
+$('demo-prep').addEventListener('click',()=>saveText('FICTIONAL EDITORIAL EXAMPLE\n\n'+preparationText(pack),'example-interview-and-action-plan.txt'));

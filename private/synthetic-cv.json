@@ -1,5 +1,5 @@
 {
-  "resume": "Synthetic CV fixture only. All employers and education details are fictional; no real person is represented.\nOperations Coordinator\nExperience\nOperations Coordinator | Example Distribution Co. | 2023 - Present\nCoordinated supplier communication and weekly delivery schedules.\nPrepared monthly progress reports using Excel.\nMaintained project records and tracked purchase-order approvals.\nProject Administrator | Example Services Co. | 2021 - 2023\nOrganised purchase-order information and followed up on missing documentation.\nMaintained meeting notes and shared progress updates with team members.\nEducation\nBachelor of Business Administration | Example College | 2021\nSkills: Excel, supplier communication, delivery scheduling, progress reporting, purchase-order tracking and document control.",
+  "resume": "Synthetic CV fixture only. All employers and education details are fictional; no real person is represented.\nOperations Coordinator\nExperience\nOperations Coordinator | Example Distribution Co. | 2023 - Present\nCoordinated supplier communication and weekly delivery schedules. I contacted suppliers to confirm dates and kept the delivery sheet updated when dates changed.\nPrepared monthly progress reports using Excel. I collected delivery updates and purchase-order status from team emails and added them to the monthly report.\nMaintained project records and tracked purchase-order approvals. I checked which purchase orders were waiting for approval and followed up with the relevant team member.\nProject Administrator | Example Services Co. | 2021 - 2023\nOrganised purchase-order information and followed up on missing documentation.\nMaintained meeting notes and shared progress updates with team members.\nEducation\nBachelor of Business Administration | Example College | 2021\nSkills: Excel, supplier communication, delivery scheduling, progress reporting, purchase-order tracking and document control.",
   "job_description": "Synthetic Operations Coordinator posting at Example Hiring Co. Requires supplier communication, weekly delivery schedules, monthly progress reporting, Excel, purchase-order records and documentation. SAP is preferred. No real vacancy or employer is represented.",
   "cv": {
     "headline": "Operations Coordinator",
@@ -45,16 +45,16 @@
         "quote": "Operations Coordinator | Example Distribution Co. | 2023 - Present",
         "bullets": [
           {
-            "text": "Coordinated supplier communication and weekly delivery schedules.",
-            "quote": "Coordinated supplier communication and weekly delivery schedules."
+            "text": "Confirmed supplier delivery dates and kept weekly schedules current as delivery plans changed.",
+            "quote": "Coordinated supplier communication and weekly delivery schedules. I contacted suppliers to confirm dates and kept the delivery sheet updated when dates changed."
           },
           {
-            "text": "Prepared monthly progress reports using Excel.",
-            "quote": "Prepared monthly progress reports using Excel."
+            "text": "Consolidated delivery and purchase-order updates into monthly Excel progress reports.",
+            "quote": "Prepared monthly progress reports using Excel. I collected delivery updates and purchase-order status from team emails and added them to the monthly report."
           },
           {
-            "text": "Maintained project records and tracked purchase-order approvals.",
-            "quote": "Maintained project records and tracked purchase-order approvals."
+            "text": "Tracked pending purchase-order approvals and followed up with team members while maintaining project records.",
+            "quote": "Maintained project records and tracked purchase-order approvals. I checked which purchase orders were waiting for approval and followed up with the relevant team member."
           }
         ]
       },
@@ -81,6 +81,82 @@
         "institution": "Example College",
         "dates": "2021",
         "quote": "Bachelor of Business Administration | Example College | 2021"
+      }
+    ]
+  },
+  "application_pack": {
+    "target": {
+      "role": "Operations Coordinator",
+      "company": "Example Hiring Co.",
+      "quote": "Synthetic Operations Coordinator posting at Example Hiring Co."
+    },
+    "cover_letter": [
+      {
+        "text": "In my coordination work, I contacted suppliers to confirm delivery dates and updated weekly schedules when those dates changed. Your requirement for supplier communication and delivery scheduling connects closely with those responsibilities.",
+        "quotes": [
+          "Coordinated supplier communication and weekly delivery schedules. I contacted suppliers to confirm dates and kept the delivery sheet updated when dates changed."
+        ]
+      },
+      {
+        "text": "I prepared monthly Excel progress reports by collecting delivery updates and purchase-order status from team emails. I also tracked purchase orders awaiting approval and followed up with the relevant team member. This experience would help me contribute to the reporting and documentation responsibilities described in your posting.",
+        "quotes": [
+          "Prepared monthly progress reports using Excel. I collected delivery updates and purchase-order status from team emails and added them to the monthly report.",
+          "Maintained project records and tracked purchase-order approvals. I checked which purchase orders were waiting for approval and followed up with the relevant team member."
+        ]
+      }
+    ],
+    "interview_answers": [
+      {
+        "question": "How does your experience relate to our supplier and delivery coordination work?",
+        "answer": "I contacted suppliers to confirm delivery dates and kept the delivery sheet updated when those dates changed. That meant coordinating supplier communication alongside the weekly schedule. To illustrate this, I would describe a real delivery-date change and the update I made.",
+        "quotes": [
+          "Coordinated supplier communication and weekly delivery schedules. I contacted suppliers to confirm dates and kept the delivery sheet updated when dates changed."
+        ],
+        "follow_up": "Recall one actual delivery week: who needed an update, what changed, and what you personally did. Add the outcome only if you can substantiate it."
+      },
+      {
+        "question": "What experience do you have with Excel and progress reporting?",
+        "answer": "I collected delivery updates and purchase-order status from team emails and used that information in monthly Excel progress reports. I would describe the report structure and an example of the information I consolidated.",
+        "quotes": [
+          "Prepared monthly progress reports using Excel. I collected delivery updates and purchase-order status from team emails and added them to the monthly report."
+        ],
+        "follow_up": "Name the Excel features you actually used and explain one check you performed. Do not add formulas or dashboards you have not used."
+      },
+      {
+        "question": "How have you handled incomplete purchase-order documentation?",
+        "answer": "In my project administration role, I organised purchase-order information and followed up on missing documentation. I would explain one real follow-up, the information that was missing, and the steps I took to obtain it.",
+        "quotes": [
+          "Organised purchase-order information and followed up on missing documentation."
+        ],
+        "follow_up": "Choose a genuine example. Identify the missing document, who you contacted and the eventual outcome; avoid disclosing confidential supplier details."
+      }
+    ],
+    "action_plan": [
+      {
+        "requirement": "SAP",
+        "job_quote": "SAP is preferred.",
+        "status": "not_evidenced",
+        "next_step": "Check whether you have actually used SAP. If yes, add the task and context to your source CV. If not, leave SAP out of your skills and ask whether the employer accepts experience with other systems."
+      }
+    ],
+    "changes": [
+      {
+        "original": "Coordinated supplier communication and weekly delivery schedules. I contacted suppliers to confirm dates and kept the delivery sheet updated when dates changed.",
+        "revised": "Confirmed supplier delivery dates and kept weekly schedules current as delivery plans changed.",
+        "why": "Replaces a broad coordination statement with the actual actions supplied: confirming dates and updating schedules. This directly addresses the weekly delivery scheduling requirement.",
+        "job_quote": "Requires supplier communication, weekly delivery schedules, monthly progress reporting, Excel, purchase-order records and documentation."
+      },
+      {
+        "original": "Prepared monthly progress reports using Excel. I collected delivery updates and purchase-order status from team emails and added them to the monthly report.",
+        "revised": "Consolidated delivery and purchase-order updates into monthly Excel progress reports.",
+        "why": "Makes the report inputs and output clear: delivery updates and purchase-order status become an Excel progress report. It shows how the stated experience connects to the reporting requirement.",
+        "job_quote": "Requires supplier communication, weekly delivery schedules, monthly progress reporting, Excel, purchase-order records and documentation."
+      },
+      {
+        "original": "Maintained project records and tracked purchase-order approvals. I checked which purchase orders were waiting for approval and followed up with the relevant team member.",
+        "revised": "Tracked pending purchase-order approvals and followed up with team members while maintaining project records.",
+        "why": "Explains what approval tracking involved and who received follow-ups, without adding invented savings, team size or authority.",
+        "job_quote": "Requires supplier communication, weekly delivery schedules, monthly progress reporting, Excel, purchase-order records and documentation."
       }
     ]
   }

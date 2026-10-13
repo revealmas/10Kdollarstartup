@@ -12,6 +12,6 @@ The live owner panel can save DeepSeek/model and Stripe test/webhook credentials
 
 The isolated Supabase project “10K Dollar Startup” has an empty, encrypted-state schema with RLS and service-only access; security and performance advisors reported no findings. Its server credentials are not configured. MAFSAN-DEMO was not accessed.
 
-The paid recovery product is an application **review bundle**, with original supplied CV text, evidence-based guidance and a grounded cover-letter template. It does not yet reproduce the original MVP’s unknown CV rewriting feature. Word export contains the review bundle; PDF uses browser print. No full paid package is sent to the browser before verified payment.
+The application pack now requires a source-grounded CV, tailored cover letter, evidence-linked interview answer outlines, requirement action plan and explained edits. CV and letter have direct Word/PDF exports. Explore the clearly fictional full example at `/demo.html`. No full customer package is sent to the browser before verified payment. See [the value-pack release](docs/VALUE-PACK-RELEASE.md) for validation and remaining launch blockers.
 
 Read [docs/STATUS.md](docs/STATUS.md), [docs/INTEGRATION.md](docs/INTEGRATION.md), and [docs/UAE-LAUNCH-REVIEW.md](docs/UAE-LAUNCH-REVIEW.md). Never upload the whole source kit into public_html. Only public/ belongs there; private/ stays outside the web root.

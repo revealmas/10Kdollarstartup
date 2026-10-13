@@ -30,7 +30,7 @@ final class SandboxCheck {
             'gaps'=>['This is a synthetic test, not applicant guidance.'],
             'interview_questions'=>['Synthetic interview question for test data only.'],
             'tips'=>['Do not use this fixture as a job application.']];
-        $report['cv']=$fixture['cv'];
+        $report['cv']=$fixture['cv'];$report['application_pack']=$fixture['application_pack'];
         $service=new Service(new SandboxMemoryStore(),$settings,fn($r,$j)=>$report,
             function($method,$path,$params,$idempotency)use($gateway,&$phase,&$sessionId){
                 $phase=$method==='POST'?'sandbox Checkout creation':'sandbox payment configuration';
@@ -40,7 +40,7 @@ final class SandboxCheck {
             });
         try {
             $owner=bin2hex(random_bytes(32));
-            $preview=$service->prepare(['resume'=>$resume,'job_description'=>'Synthetic coordinator posting for testing supplier communication, reporting and schedule tracking only.','consent'=>true,'adult'=>true],$owner);
+            $preview=$service->prepare(['resume'=>$resume,'job_description'=>$fixture['job_description'],'consent'=>true,'adult'=>true],$owner);
             $service->acknowledgePreview($preview['order_id'],$owner);
             $service->checkout(['order_id'=>$preview['order_id'],'billing_country'=>'AE','accept_terms'=>true,'accept_delivery'=>true],$owner);
             if(!is_string($sessionId)||!preg_match('/^cs_test_[A-Za-z0-9]+$/D',$sessionId))throw new Problem(502,'Unexpected sandbox session.');

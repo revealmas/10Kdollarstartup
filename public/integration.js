@@ -43,7 +43,7 @@ export function packageText(bundle) {
   const r = bundle.analysis;
   return ['ApplyPilot digital application assistance', bundle.notice, 'Original CV text', bundle.original_cv,
     'Fit overview', r.summary, 'Evidence from your CV', ...r.strengths.map(x => `${x.quote}\n${x.reason}`),
-    'Requirements to verify', ...r.gaps, 'Cover letter template — review and personalise', bundle.cover_letter_template,
+    'Requirements to verify', ...r.gaps, ...(bundle.cover_letter_template?['Cover letter template — review and personalise', bundle.cover_letter_template]:[]),
     'Interview preparation', ...r.interview_questions, 'Application tips', ...r.tips].join('\n\n');
 }
 export function downloadText(bundle) {

@@ -38,18 +38,18 @@ assert.equal(element('status').textContent,'Owner sign-in required.');
 console.log('PASS Expired owner session clears dashboard and unsaved secrets, restoring sign-in');
 
 // An already fulfilled page must clear its cached package when access is revoked.
-const {cv:fixtureCv}=await import('../public/cv-example-data.js');bundle.cv=fixtureCv;
+const {cv:fixtureCv}=await import('../public/cv-example-data.js');bundle.cv=fixtureCv;const {example}=await import('../public/pack-example-data.js');bundle.application_pack=example.application_pack;
 const returnElements=new Map();const returnElement=id=>{if(!returnElements.has(id))returnElements.set(id,{hidden:true,disabled:false,textContent:'',value:'',children:[],replaceChildren(...items){this.children=items;},focus(){},addEventListener(type,handler){this[type]=handler;}});return returnElements.get(id);};
 const payment={paid:true,expired:false,downloads:0};
 class MockReturnApi {async start(){return {support_email:'support@example.invalid'};}async status(){if(payment.expired)throw Error('Package has expired or was deleted.');return {state:payment.paid?'paid':'revoked',paid:payment.paid};}async result(){return {package:bundle};}}
-const returnContext=vm.createContext({document:{getElementById:returnElement},ApplyPilot:MockReturnApi,packageText:()=> 'Synthetic paid preview',downloadText:()=>{payment.downloads++;},renderCv:()=>({synthetic:true}),cvText:()=> 'Synthetic CV',downloadCvDocx:()=>{payment.downloads++;},downloadCvPdf:async()=>{payment.downloads++;},sessionStorage:{getItem:()=> 'synthetic-order'},window:{print(){}},Error});
+const returnContext=vm.createContext({document:{getElementById:returnElement},ApplyPilot:MockReturnApi,packageText:()=> 'Synthetic paid preview',downloadText:()=>{payment.downloads++;},renderApplicationPack:()=>({synthetic:true}),downloadLetter:async()=>{payment.downloads++;},saveText:()=>{payment.downloads++;},coverLetterText:()=> 'letter',preparationText:()=> 'prep',renderCv:()=>({synthetic:true}),cvText:()=> 'Synthetic CV',downloadCvDocx:()=>{payment.downloads++;},downloadCvPdf:async()=>{payment.downloads++;},sessionStorage:{getItem:()=> 'synthetic-order'},window:{print(){}},Error});
 let returnSource=fs.readFileSync('public/return.js','utf8').replace(/^import .*\n/gm,'').replace(/check\(\);\s*$/,'await check();');
 await vm.runInContext('(async()=>{'+returnSource+'})()',returnContext);
 assert.equal(returnElement('preview').hidden,false);assert.equal(returnElement('download').hidden,false);
 returnElement('cv-name').value='Synthetic Name';returnElement('cv-email').value='synthetic@example.invalid';
 payment.paid=false;await returnElement('retry').click();
-for(const id of ['preview','download','docx','pdf'])assert.equal(returnElement(id).hidden,true,'Revocation must hide '+id);
-assert.equal(returnElement('preview').textContent,'');assert.equal(returnElement('cv-page').children.length,0);assert.equal(returnElement('cv-name').value,'');assert.equal(returnElement('cv-email').value,'');returnElement('download').click();assert.equal(payment.downloads,0,'Hidden stale download cannot use a cached package');
+for(const id of ['preview','download','docx','pdf','pack-downloads'])assert.equal(returnElement(id).hidden,true,'Revocation must hide '+id);
+assert.equal(returnElement('preview').textContent,'');assert.equal(returnElement('cv-page').children.length,0);assert.equal(returnElement('application-pack').children.length,0);returnElement('letter-download').click();returnElement('prep-download').click();await returnElement('letter-pdf').click();assert.equal(returnElement('cv-name').value,'');assert.equal(returnElement('cv-email').value,'');returnElement('download').click();assert.equal(payment.downloads,0,'Hidden stale download cannot use a cached package');
 payment.paid=true;await returnElement('retry').click();payment.expired=true;await returnElement('retry').click();
 assert.equal(returnElement('preview').hidden,true);assert.equal(returnElement('preview').textContent,'');assert.equal(returnElement('status').textContent,'Package has expired or was deleted.');
 console.log('PASS Refund/expiry clears cached fulfilled content and stale download controls');
@@ -60,3 +60,8 @@ fs.writeFileSync('work/test-cv.docx',cvDocxBytes(fixtureCv,exampleContact,{examp
 console.log('PASS Structured CV Word/PDF export and safe local contact rendering');
 
 const index=fs.readFileSync('public/index.html','utf8');for(const id of ['cv-readiness','cv-original','cv-draft-example'])assert(index.includes('id="'+id+'"'),'CV preview anchor '+id);
+
+const {letterDocxBytes,letterPdfBytes}=await import('../public/letter-export.js');
+fs.writeFileSync('work/test-letter.docx',letterDocxBytes(example.application_pack,exampleContact,{example:true}));fs.writeFileSync('work/test-letter.pdf',await letterPdfBytes(example.application_pack,exampleContact,{example:true}));
+assert(!fs.readFileSync('public/pack-view.js','utf8').includes('innerHTML'));
+console.log('PASS Cover letter Word/PDF exports and revoked pack download controls');
