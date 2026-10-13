@@ -202,6 +202,19 @@ final class Service {
             return $s['orders'][$id];
         });
         if ($o['checkout']) return ['url'=>$o['checkout']['url']];
+        $pmc=$this->config['stripe_payment_method_configuration'] ?? '';
+        if(!preg_match('/^pmc_[A-Za-z0-9]+$/',$pmc)) throw new Problem(503,'Payment method configuration is incomplete.');
+        $methods=($this->stripe)('GET','/v1/payment_method_configurations/'.$pmc,[],null);
+        if(($methods['id'] ?? '')!==$pmc || ($methods['active'] ?? false)!==true
+            || ($methods['livemode'] ?? null)!==(bool)$this->config['stripe_live']
+            || ($methods['card']['available'] ?? false)!==true)
+            throw new Problem(503,'Payment method configuration is unavailable.');
+        // Packages expire in 24 hours: refuse methods with delayed settlement.
+        foreach($methods as $name=>$setting)
+            if(is_array($setting) && (($setting['available'] ?? false)===true
+                || ($setting['display_preference']['value'] ?? '')==='on')
+                && !in_array($name,['card','apple_pay','google_pay','link'],true))
+                throw new Problem(503,'Payment methods need review before checkout.');
         $line=['price_data'=>['currency'=>'usd','unit_amount'=>900,'tax_behavior'=>'inclusive',
             'product_data'=>['name'=>'ApplyPilot digital application assistance bundle']], 'quantity'=>1];
         $tax=$this->config['country_tax_rates'][$country];
@@ -213,7 +226,8 @@ final class Service {
         }
         $base=rtrim($this->config['base_url'],'/');
         $session=($this->stripe)('POST','/v1/checkout/sessions',[
-            'mode'=>'payment','payment_method_types'=>['card'],'line_items'=>[$line],
+            'mode'=>'payment','payment_method_configuration'=>$pmc,'line_items'=>[$line],
+            'integration_identifier'=>$this->config['stripe_integration_identifier'],
             'client_reference_id'=>$id,'metadata'=>['order_id'=>$id,'product'=>'applypilot-v1','billing_country'=>$country],
             'payment_intent_data'=>['metadata'=>['order_id'=>$id,'product'=>'applypilot-v1']],
             'billing_address_collection'=>'required','consent_collection'=>['terms_of_service'=>'required'],

@@ -34,6 +34,8 @@ $report=['summary'=>'Your supplied CV shows relevant coordination experience. Ve
 $store=new MemoryStore(); $session=[]; $stripeCalls=[];
 $stripe=function($method,$path,$params,$key)use(&$session,&$stripeCalls){
     $stripeCalls[]=[$method,$path,$params,$key];
+    if(str_starts_with($path,'/v1/payment_method_configurations/')) return [
+        'id'=>substr($path,strrpos($path,'/')+1),'active'=>true,'livemode'=>false,'card'=>['available'=>true]];
     if($method==='POST') return ['id'=>'cs_test_fixture','url'=>'https://checkout.stripe.com/c/pay/cs_test_fixture'];
     return $session;
 };
@@ -65,6 +67,7 @@ foreach(['checkout_enabled','licence_confirmed','privacy_confirmed','tax_confirm
 }
 $url=$svc->checkout($checkout,$owner);
 $call=end($stripeCalls); $params=$call[2];
+ok(!isset($params['payment_method_types']) && isset($params['payment_method_configuration']),'Uses reviewed dynamic payment configuration');
 ok($params['line_items'][0]['price_data']['unit_amount']===900 && $params['line_items'][0]['price_data']['currency']==='usd','Client amount and currency cannot override price');
 ok($params['mode']==='payment' && $params['line_items'][0]['quantity']===1 && !isset($params['allow_promotion_codes']),'One-time fixed quantity, no discount or subscription');
 ok($params['line_items'][0]['price_data']['tax_behavior']==='inclusive','Any configured tax is inside the 9 dollar total');
@@ -145,4 +148,10 @@ $freshStore=new MemoryStore();$fresh=new Service($freshStore,$config,$ai,$stripe
 $latePreview=$fresh->prepare($input,'late-owner');$lateId=$latePreview['order_id'];$fresh->acknowledgePreview($lateId,'late-owner');
 $late=new Service($freshStore,$config,$ai,$stripe,fn()=>$now+86400-100);
 fails(fn()=>$late->checkout(array_merge($checkout,['order_id'=>$lateId]),'late-owner'),409,'Expiring package cannot enter checkout');
+$methodStore=new MemoryStore();
+$delayedStripe=fn($method,$path,$params,$key)=>['id'=>$config['stripe_payment_method_configuration'],
+    'active'=>true,'livemode'=>false,'card'=>['available'=>true],'sepa_debit'=>['available'=>true]];
+$methodSvc=new Service($methodStore,$config,$ai,$delayedStripe,fn()=>$now);
+$mp=$methodSvc->prepare($input,'method-owner');$methodSvc->acknowledgePreview($mp['order_id'],'method-owner');
+fails(fn()=>$methodSvc->checkout(array_merge($checkout,['order_id'=>$mp['order_id']]),'method-owner'),503,'Delayed-settlement method cannot enter short-lived package checkout');
 echo 'RESULT '.$passed.' checks passed. MemoryStore and mocked provider calls only.'.PHP_EOL;

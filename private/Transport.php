@@ -48,9 +48,9 @@ function stripe(array $config): callable {
         $key=$config['stripe_key'] ?? '';
         $mode=($config['stripe_live'] ?? false)?'live':'test';
         if(!str_starts_with($key,'sk_'.$mode.'_') && !str_starts_with($key,'rk_'.$mode.'_')) throw new Problem(503,'Stripe credentials do not match the configured mode.');
-        if(!preg_match('~^/v1/(checkout/sessions(?:/cs_[A-Za-z0-9_]+(?:/expire)?)?|tax_rates/txr_[A-Za-z0-9]+)$~',$path))
+        if(!preg_match('~^/v1/(checkout/sessions(?:/cs_[A-Za-z0-9_]+(?:/expire)?)?|tax_rates/txr_[A-Za-z0-9]+|payment_method_configurations/pmc_[A-Za-z0-9]+)$~',$path))
             throw new Problem(500,'Unsupported payment operation.');
-        $headers=['Authorization: Bearer '.$key,'Content-Type: application/x-www-form-urlencoded'];
+        $headers=['Authorization: Bearer '.$key,'Content-Type: application/x-www-form-urlencoded','Stripe-Version: 2026-08-26.dahlia'];
         if($idempotency!==null) $headers[]='Idempotency-Key: '.$idempotency;
         return requestJson('https://api.stripe.com'.$path,$method,$headers,
             $method==='POST'?http_build_query($params,'','&',PHP_QUERY_RFC3986):null);

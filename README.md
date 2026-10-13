@@ -6,7 +6,7 @@ Available now: responsive interface, useful browser-local CV word review, direct
 
 AI processing, paid checkout and unreviewed job feeds are disabled by default. There are no subscriptions, external fonts, tracking pixels, paid libraries or Supabase dependencies. Existing MAFSAN-DEMO was not accessed.
 
-62 core checks and 29 PHP runtime checks passed, including real OpenSSL storage encryption, session cookies, gateway protections and admin authorization. A bounded 100-request sequential local test exercised rate limiting. Native concurrent file-lock tests and 15 HTTP checks passed in GitHub CI, including 100 concurrent load requests in batches of 10. These checks do **not** establish production readiness: real DeepSeek output, Hostinger integration, real Stripe test Checkout/webhooks, licensed activity, tax and provider privacy terms remain required.
+65 core checks and 29 PHP runtime checks passed, including real OpenSSL storage encryption, session cookies, gateway protections and admin authorization. A bounded 100-request sequential local test exercised rate limiting. Native concurrent file-lock tests and 15 HTTP checks passed in GitHub CI, including 100 concurrent load requests in batches of 10. These checks do **not** establish production readiness: real DeepSeek output, Hostinger integration, real Stripe test Checkout/webhooks, licensed activity, tax and provider privacy terms remain required.
 
 The isolated Supabase project “10K Dollar Startup” has an empty, encrypted-state schema with RLS and service-only access; security and performance advisors reported no findings. Its server credentials are not configured. MAFSAN-DEMO was not accessed.
 
