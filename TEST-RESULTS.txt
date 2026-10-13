@@ -42,13 +42,20 @@ PASS Duplicate webhook does not duplicate fulfillment
 PASS Paid order cannot create another charge
 PASS Refund revokes package access
 PASS Late payment event cannot restore refunded access
-PASS Refund arriving before binding requires webhook retry
+PASS Unbound refund is acknowledged and retained privately
+PASS Earlier refund leaves a payment tombstone
+PASS Other-product Checkout is ignored without fulfillment
 PASS Contact details redacted before provider
 PASS Deletion removes personal package and preview
 PASS Deleted package inaccessible
 PASS Invented CV evidence rejected
 PASS Contact details redacted before provider
 PASS Daily AI credit-use cap enforced
+PASS Contact details redacted before provider
+PASS Cumulative AI allowance cannot reset at midnight or with a new owner
+PASS Cleanup preserves the cumulative AI reservation
+PASS Provider failure is returned without retry
+PASS Failed provider calls consume the cumulative allowance
 PASS AI remains disabled until configured
 PASS Contact details redacted before provider
 PASS Package expires after 24 hours
@@ -63,5 +70,7 @@ PASS Contact details redacted before provider
 PASS Expiring package cannot enter checkout
 PASS Contact details redacted before provider
 PASS Delayed-settlement method cannot enter short-lived package checkout
-RESULT 65 checks passed. MemoryStore and mocked provider calls only.
-
+PASS Contact details redacted before provider
+PASS Refund arriving before paid binding permanently prevents fulfillment
+PASS Consumed refund tombstone is removed after binding
+RESULT 75 checks passed. MemoryStore and mocked provider calls only.
