@@ -6,7 +6,9 @@ Available now: responsive interface, useful browser-local CV word review, direct
 
 AI processing, paid checkout and unreviewed job feeds are disabled by default. There are no subscriptions, external fonts, tracking pixels, paid libraries or Supabase dependencies. Existing MAFSAN-DEMO was not accessed.
 
-65 core checks and 29 PHP runtime checks passed, including real OpenSSL storage encryption, session cookies, gateway protections and admin authorization. A bounded 100-request sequential local test exercised rate limiting. Native concurrent file-lock tests and 15 HTTP checks passed in GitHub CI, including 100 concurrent load requests in batches of 10. These checks do **not** establish production readiness: real DeepSeek output, Hostinger integration, real Stripe test Checkout/webhooks, licensed activity, tax and provider privacy terms remain required.
+65 core checks and 30 local PHP runtime checks passed. Native GitHub CI also passed authenticated encryption/tamper/wrong-key checks, encrypted integration settings, four writers with 100 commits and no lost updates, and 18 HTTP access-control checks. Its bounded local load ran 100 requests at concurrency 10: p50 10 ms, p95 17 ms, 55 HTTP 200 and 45 rate-limited HTTP 429. This does not measure production capacity. On Hostinger, 23 synthetic functional/security checks passed, including owner sign-in, private-path isolation and rejection of live Stripe credentials. Real DeepSeek quality and real Stripe test Checkout/webhook/refund flows remain pending.
+
+The live owner panel can save DeepSeek/model and Stripe test/webhook credentials in encrypted server storage without returning secret values or enabling paid features. Owner credentials are kept out of source archives. Commercial processing remains disabled pending licence, privacy, tax, merchant and provider verification.
 
 The isolated Supabase project “10K Dollar Startup” has an empty, encrypted-state schema with RLS and service-only access; security and performance advisors reported no findings. Its server credentials are not configured. MAFSAN-DEMO was not accessed.
 

@@ -50,4 +50,4 @@ PASS Bounded requests safely succeed or rate-limit
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 30 checks passed. Native pcntl/Hostinger/provider tests still pending.
+RESULT 30 checks passed. Native pcntl concurrency passed separately in CI; 23 Hostinger checks passed separately. Real DeepSeek/Stripe provider flows remain pending.
