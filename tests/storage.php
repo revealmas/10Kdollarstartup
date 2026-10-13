@@ -31,6 +31,9 @@ check($settings->read()['stripe_key']===$fixture,'Invalid update leaves previous
 check($settings->save(['stripe_payment_method_configuration'=>'pmc_syntheticSandbox'])['stripe_payment_method_configuration']==='pmc_syntheticSandbox','Sandbox payment configuration can be stored without credentials in response');
 try{$settings->save(['stripe_payment_method_configuration'=>'https://evil.example']);throw new RuntimeException('invalid configuration accepted');}catch(ApplyPilot\Problem $e){check($e->status===422,'Payment configuration rejects URL injection');}
 check($settings->read()['stripe_payment_method_configuration']==='pmc_syntheticSandbox','Invalid payment configuration preserves previous value');
+check($settings->save(['support_email'=>'support@example.invalid'])['support_email']==='support@example.invalid','Owner can configure a valid public support email without exposing credentials');
+try{$settings->save(['deepseek_model'=>'changed-model','support_email'=>"support@example.invalid\r\nBcc: other@example.invalid"]);throw new RuntimeException('invalid email accepted');}catch(ApplyPilot\Problem $e){check($e->status===422,'Support address rejects header injection');}
+check($settings->read()['deepseek_model']==='synthetic-model'&&$settings->read()['support_email']==='support@example.invalid','Invalid support update preserves all previous settings atomically');
 foreach(glob($dir.'/data/*') as $f)unlink($f);rmdir($dir.'/data');
 foreach(glob($dir.'/*') as $f)unlink($f);rmdir($dir);
 echo 'Storage checks complete.'.PHP_EOL;

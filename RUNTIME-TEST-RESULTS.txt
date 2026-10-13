@@ -30,6 +30,9 @@ PASS Invalid update leaves previous credential intact
 PASS Sandbox payment configuration can be stored without credentials in response
 PASS Payment configuration rejects URL injection
 PASS Invalid payment configuration preserves previous value
+PASS Owner can configure a valid public support email without exposing credentials
+PASS Support address rejects header injection
+PASS Invalid support update preserves all previous settings atomically
 Storage checks complete.
 PASS Bounded synthetic sandbox diagnostic tests
 PASS Synthetic diagnostic creates retrieves and expires a test Checkout
@@ -86,4 +89,4 @@ PASS Bounded requests safely succeed or rate-limit
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 36 checks passed. Native concurrency and Hostinger access controls verified separately; actual synthetic Hostinger AI/Stripe checks passed separately (see docs/STATUS.md); paid flow and broader AI quality remain pending.
+RESULT 36 checks passed. Native concurrency and Hostinger access controls verified separately; actual new AI provider tests pending.

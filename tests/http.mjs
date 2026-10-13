@@ -36,8 +36,9 @@ try{
  check((await req('ai-check',{admin:true,token:'bad'})).response.status===403,'AI diagnostic CSRF forgery denied');
  const snap=await req('snapshot',{admin:true});check(snap.response.status===200&&!!snap.body.gates,'Authenticated operational dashboard');
  check(!JSON.stringify(snap.body).includes(password),'Owner password absent from dashboard');
- const setting=await req('save-integrations',{admin:true,body:{stripe_key:'rk_test_'+'A'.repeat(24)}});
+ const setting=await req('save-integrations',{admin:true,body:{stripe_key:'rk_test_'+'A'.repeat(24),support_email:'support@example.invalid'}});
  check(setting.response.status===200&&setting.body.stripe_test_configured===true&&!JSON.stringify(setting.body).includes('rk_test_'),'Owner settings save without returning credential');
+ const publicConfig=await req('bootstrap',{method:'GET'});check(publicConfig.body.support_email==='support@example.invalid'&&!publicConfig.body.ai_enabled&&!publicConfig.body.checkout_enabled&&!JSON.stringify(publicConfig.body).includes('rk_test_'),'Public recovery contact propagates without keys or enabling launch');
  check((await req('save-integrations',{admin:true,body:{stripe_key:'rk_live_'+'B'.repeat(24)}})).response.status===422,'Live key denied by test setup');
  await req('logout',{admin:true});check((await req('snapshot',{admin:true})).response.status===401,'Logout revokes owner session');
  // Bounded local-only load, no provider calls and no public stress traffic.

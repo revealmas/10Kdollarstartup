@@ -3,10 +3,11 @@ declare(strict_types=1);
 namespace ApplyPilot;
 require_once __DIR__.'/Core.php';
 final class IntegrationSettings {
-    private Store $store; private string $defaultPaymentConfiguration;
-    private const FIELDS=['deepseek_key','deepseek_model','stripe_key','stripe_webhook_secret','stripe_payment_method_configuration'];
+    private Store $store; private string $defaultPaymentConfiguration; private string $defaultSupportEmail;
+    private const FIELDS=['deepseek_key','deepseek_model','stripe_key','stripe_webhook_secret','stripe_payment_method_configuration','support_email'];
     public function __construct(string $dir,array $config) {
         $this->defaultPaymentConfiguration=$config['stripe_payment_method_configuration']??'';
+        $this->defaultSupportEmail=$config['support_email']??'';
         $this->store=new EncryptedFileStore($dir.'/data/integrations.enc',$config['storage_key']);
     }
     public function read(): array {
@@ -16,7 +17,8 @@ final class IntegrationSettings {
         $s=$this->read();return ['deepseek_configured'=>!empty($s['deepseek_key']),
             'deepseek_model'=>$s['deepseek_model']??'', 'stripe_test_configured'=>!empty($s['stripe_key']),
             'webhook_configured'=>!empty($s['stripe_webhook_secret']),
-            'stripe_payment_method_configuration'=>$s['stripe_payment_method_configuration']??$this->defaultPaymentConfiguration];
+            'stripe_payment_method_configuration'=>$s['stripe_payment_method_configuration']??$this->defaultPaymentConfiguration,
+            'support_email'=>$s['support_email']??$this->defaultSupportEmail];
     }
     public function save(array $input): array {
         $values=[];
@@ -24,6 +26,11 @@ final class IntegrationSettings {
             if(!in_array($name,self::FIELDS,true))throw new Problem(422,'Unsupported setting.');
             if(!is_string($value)||strlen($value)>300)throw new Problem(422,'Invalid setting.');
             $value=trim($value);if($value==='')continue;
+            if($name==='support_email'){
+                if(strlen($value)>254||filter_var($value,FILTER_VALIDATE_EMAIL)===false)
+                    throw new Problem(422,'Enter a valid monitored support email.');
+                $values[$name]=$value;continue;
+            }
             $pattern=match($name){
                 'deepseek_key'=>'/^[A-Za-z0-9_-]{20,240}$/D',
                 'deepseek_model'=>'/^[A-Za-z0-9._-]{1,100}$/D',
