@@ -17,7 +17,7 @@ final class SupabaseStore implements Store {
         return requestJson($this->config['supabase_url'].'/rest/v1/'.$path,$method,
             ['apikey: '.$this->config['supabase_service_key'],
              'Authorization: Bearer '.$this->config['supabase_service_key'],'Content-Type: application/json'],
-            $body===null?null:json_encode($body,JSON_THROW_ON_ERROR));
+            $body===null?null:json_encode($body,JSON_THROW_ON_ERROR),10485760);
     }
     public function transaction(callable $fn){
         for($attempt=0;$attempt<6;$attempt++){

@@ -1,0 +1,47 @@
+PASS PHP parser private/Admin.php
+PASS PHP parser private/Core.php
+PASS PHP parser private/SupabaseStore.php
+PASS PHP parser private/Transport.php
+PASS PHP parser private/config.example.php
+PASS PHP parser private/maintenance.php
+PASS PHP parser private/metrics.php
+PASS PHP parser private/refresh_jobs.php
+PASS PHP parser public/admin-api.php
+PASS PHP parser public/api.php
+PASS PHP parser tests/core.php
+PASS PHP parser tests/router.php
+PASS PHP parser tests/storage.php
+PASS Authenticated encrypted-storage tests
+PASS No plaintext CV in encrypted file
+PASS Encrypted storage round trip
+PASS Wrong encryption key rejected
+PASS Authenticated encryption rejects tampering
+SKIP pcntl concurrency unavailable
+Storage checks complete.
+PASS Gateway bootstrap
+PASS Secure HttpOnly cookie
+PASS No-cache private responses
+PASS Guessed package denied
+PASS Forged CSRF denied
+PASS Wrong origin denied
+PASS AI fails closed without configuration
+PASS Unsigned webhook denied
+PASS Anonymous admin snapshot denied
+PASS Wrong admin password denied
+PASS Authenticated admin sign-in
+PASS Authenticated operational snapshot
+PASS Dashboard excludes owner password
+PASS Sign-out revokes owner session
+PASS Bounded requests safely succeed or rate-limit
+{
+  "requests": 100,
+  "concurrency": 1,
+  "p50_ms": 3,
+  "p95_ms": 3,
+  "responses": {
+    "200": 55,
+    "429": 45
+  },
+  "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
+}
+RESULT 29 checks passed. Native pcntl/Hostinger/provider tests still pending.

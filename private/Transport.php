@@ -3,15 +3,15 @@ declare(strict_types=1);
 namespace ApplyPilot;
 require_once __DIR__.'/Core.php';
 
-function requestJson(string $url,string $method,array $headers,?string $body=null): array {
+function requestJson(string $url,string $method,array $headers,?string $body=null,int $maxBytes=1048576): array {
     if (!function_exists('curl_init')) throw new Problem(503,'Server HTTP support is unavailable.');
     $ch=curl_init($url); $response='';
     curl_setopt_array($ch,[CURLOPT_CUSTOMREQUEST=>$method,CURLOPT_HTTPHEADER=>$headers,
         CURLOPT_FOLLOWLOCATION=>false,CURLOPT_CONNECTTIMEOUT=>5,CURLOPT_TIMEOUT=>45,
         CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,
         CURLOPT_PROTOCOLS=>CURLPROTO_HTTPS,
-        CURLOPT_WRITEFUNCTION=>function($ch,$chunk)use(&$response){
-            if(strlen($response)+strlen($chunk)>1048576) return 0;
+        CURLOPT_WRITEFUNCTION=>function($ch,$chunk)use(&$response,$maxBytes){
+            if(strlen($response)+strlen($chunk)>$maxBytes) return 0;
             $response.=$chunk; return strlen($chunk);
         }]);
     if($body!==null) curl_setopt($ch,CURLOPT_POSTFIELDS,$body);
@@ -46,8 +46,8 @@ function deepseek(array $config): callable {
 function stripe(array $config): callable {
     return function(string $method,string $path,array $params,?string $idempotency)use($config): array {
         $key=$config['stripe_key'] ?? '';
-        $prefix=($config['stripe_live'] ?? false)?'sk_live_':'sk_test_';
-        if(!str_starts_with($key,$prefix)) throw new Problem(503,'Stripe credentials do not match the configured mode.');
+        $mode=($config['stripe_live'] ?? false)?'live':'test';
+        if(!str_starts_with($key,'sk_'.$mode.'_') && !str_starts_with($key,'rk_'.$mode.'_')) throw new Problem(503,'Stripe credentials do not match the configured mode.');
         if(!preg_match('~^/v1/(checkout/sessions(?:/cs_[A-Za-z0-9_]+(?:/expire)?)?|tax_rates/txr_[A-Za-z0-9]+)$~',$path))
             throw new Problem(500,'Unsupported payment operation.');
         $headers=['Authorization: Bearer '.$key,'Content-Type: application/x-www-form-urlencoded'];

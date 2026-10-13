@@ -15,6 +15,7 @@ try{
  if(!isset($_SESSION['csrf']))$_SESSION['csrf']=bin2hex(random_bytes(32));
  $action=$_GET['action']??'';$method=$_SERVER['REQUEST_METHOD']??'';
  if($action==='bootstrap'&&$method==='GET')answer(200,['csrf'=>$_SESSION['csrf'],'signed_in'=>($_SESSION['until']??0)>time()]);
+ if($action!=='login'&&($_SESSION['until']??0)<=time())throw new \ApplyPilot\Problem(401,'Owner sign-in required.');
  if($method!=='POST')throw new \ApplyPilot\Problem(405,'Use POST.');
  $origin=parse_url($config['base_url']);$expected=$origin['scheme'].'://'.$origin['host'].(isset($origin['port'])?':'.$origin['port']:'');
  if(($_SERVER['HTTP_ORIGIN']??'')!==$expected||!hash_equals($_SESSION['csrf'],$_SERVER['HTTP_X_CSRF_TOKEN']??''))throw new \ApplyPilot\Problem(403,'Reload and try again.');

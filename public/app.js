@@ -21,8 +21,8 @@ $('preview-form').addEventListener('submit',event=>{
   $('local-preview').scrollIntoView({behavior:'smooth',block:'start'});
 });
 $('sample').addEventListener('click',()=>{
-  $('resume').value='Sample candidate — illustrative CV, not a real applicant.\nFive years of project coordination experience. Managed supplier communication and delivery schedules. Prepared monthly progress reports and tracked project budgets. Proficient in Excel, stakeholder communication and documentation.';
-  $('job-description').value='Illustrative posting — not a live vacancy.\nWe are looking for a project coordinator with experience in supplier communication, project schedules, budget reporting, stakeholder updates and risk management. Excel and documentation skills are useful.';
+  $('resume').value='Five years of project coordination experience. Managed supplier communication and delivery schedules. Prepared monthly progress reports and tracked project budgets. Proficient in Excel, stakeholder communication and documentation.';
+  $('job-description').value='We are looking for a project coordinator with experience in supplier communication, project schedules, budget reporting, stakeholder updates and risk management. Excel and documentation skills are useful.';
   $('preview-status').textContent='Sample filled. This is an illustrative CV and posting; choose Build my free preview to try it.';
 });
 $('clear').addEventListener('click',()=>{$('resume').value='';$('job-description').value='';$('local-preview').hidden=true;$('ai-preview').hidden=true;$('preview-status').textContent='Text cleared from this page.';});

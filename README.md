@@ -6,7 +6,9 @@ Available now: responsive interface, useful browser-local CV word review, direct
 
 AI processing, paid checkout and unreviewed job feeds are disabled by default. There are no subscriptions, external fonts, tracking pixels, paid libraries or Supabase dependencies. Existing MAFSAN-DEMO was not accessed.
 
-56 core security checks passed in PHP 8.3 WebAssembly with an in-memory store and mock Stripe/AI responses. This does **not** establish production readiness: native OpenSSL/file-lock/session tests, real DeepSeek output, Hostinger integration, real Stripe test Checkout/webhooks, licensed activity, tax and provider privacy terms remain required.
+62 core checks and 29 PHP runtime checks passed, including real OpenSSL storage encryption, session cookies, gateway protections and admin authorization. A bounded 100-request sequential local test exercised rate limiting. Native concurrent file-lock/HTTP tests run in CI. These checks do **not** establish production readiness: real DeepSeek output, Hostinger integration, real Stripe test Checkout/webhooks, licensed activity, tax and provider privacy terms remain required.
+
+The isolated Supabase project “10K Dollar Startup” has an empty, encrypted-state schema with RLS and service-only access; security and performance advisors reported no findings. Its server credentials are not configured. MAFSAN-DEMO was not accessed.
 
 The paid recovery product is an application **review bundle**, with original supplied CV text, evidence-based guidance and a grounded cover-letter template. It does not yet reproduce the original MVP’s unknown CV rewriting feature. Word export contains the review bundle; PDF uses browser print. No full paid package is sent to the browser before verified payment.
 
