@@ -1,6 +1,7 @@
 import {spawn,spawnSync} from 'node:child_process';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
-const root=process.cwd();const temp=fs.mkdtempSync(path.join(os.tmpdir(),'applypilot-http-'));const priv=path.join(temp,'private');fs.cpSync('private',priv,{recursive:true});
+fs.mkdirSync('work',{recursive:true});
+const temp=fs.mkdtempSync(path.join(os.tmpdir(),'applypilot-http-'));const priv=path.join(temp,'private');fs.cpSync('private',priv,{recursive:true});
 const port=19000+Math.floor(Math.random()*1000);const origin=`https://127.0.0.1:${port}`;
 const password='synthetic-owner-password-only-for-tests';
 const hash=spawnSync('php',['-r','echo password_hash($argv[1],PASSWORD_DEFAULT);',password],{encoding:'utf8'}).stdout.trim();
