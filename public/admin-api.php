@@ -29,6 +29,10 @@ try{
  }
  if(($_SESSION['until']??0)<=time())throw new \ApplyPilot\Problem(401,'Owner sign-in required.');
  if($action==='logout'){$_SESSION=[];session_destroy();answer(200,['ok'=>true]);}
+ if($action==='sandbox-check'){
+  session_write_close();require_once $dir.'/SandboxCheck.php';$checker=new \ApplyPilot\SandboxCheck($config);$checker->assertReady();$admin->reserveSandboxCheck();
+  try{$result=$checker->run();$admin->recordSandboxCheck(true);answer(200,$result);}catch(\ApplyPilot\Problem $e){$admin->recordSandboxCheck(false);throw $e;}
+ }
  if(in_array($action,['integration-status','save-integrations'],true)){
   require_once $dir.'/IntegrationSettings.php';
   $settings=new \ApplyPilot\IntegrationSettings($dir,$config);session_write_close();

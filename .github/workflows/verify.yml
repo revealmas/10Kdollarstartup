@@ -13,6 +13,7 @@ jobs:
           find private public tests -name '*.php' -print0 | xargs -0 -n1 php -l
           php tests/core.php
           php tests/storage.php
+          php tests/sandbox.php
       - name: HTTP access controls and bounded local load
         run: node tests/http.mjs
       - name: Frontend and export verification

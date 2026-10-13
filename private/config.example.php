@@ -8,7 +8,7 @@ return [
     'stripe_key' => getenv('STRIPE_SECRET_KEY') ?: '',
     'stripe_webhook_secret' => getenv('STRIPE_WEBHOOK_SECRET') ?: '',
     'stripe_live' => false,
-    'stripe_payment_method_configuration' => 'pmc_1UP59cJ6SCsBHGQtemFRBLih', // verified TEST configuration; replace for live mode
+    'stripe_payment_method_configuration' => 'pmc_1UP5CHQyYMNKD9rU96XZRtgC', // verified ISOLATED SANDBOX configuration; replace after live review
     'stripe_integration_identifier' => 'applypilot-review-ivtjjhmo',
     'deepseek_key' => getenv('DEEPSEEK_API_KEY') ?: '',
     'deepseek_model' => '', // confirm model available in user's account

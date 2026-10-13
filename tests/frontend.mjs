@@ -24,12 +24,12 @@ const context=vm.createContext({document:{getElementById:element,createElement:(
  if(url.includes('bootstrap'))return response({csrf:'synthetic-csrf',signed_in:false});
  if(expired)return {ok:false,status:401,json:async()=>({error:'Owner sign-in required.'})};
  if(url.includes('login'))return response({csrf:'synthetic-signed-csrf'});
- if(url.includes('snapshot'))return response({totals:{paid_orders:1},gates:{checkout_enabled:false},counts:{},orders:[],jobs:{count:0},ai_calls:{},storage_backend:'file',notice:'Synthetic'});
+ if(url.includes('snapshot'))return response({payments_environment:'test',totals:{paid_orders:1},gates:{checkout_enabled:false},counts:{},orders:[],jobs:{count:0},ai_calls:{},storage_backend:'file',notice:'Synthetic'});
  return response({deepseek_configured:false,stripe_test_configured:false,webhook_configured:false});
 },location:{reload(){}},Date,Error,String,Object});
 await vm.runInContext('(async()=>{'+fs.readFileSync('public/admin.js','utf8')+'})()',context);
 await element('login').submit({preventDefault(){}});
-assert.equal(element('dashboard').hidden,false);assert.equal(element('login').hidden,true);
+assert.equal(element('dashboard').hidden,false);assert(element('status').textContent.includes('not real revenue'));assert.equal(element('login').hidden,true);
 element('deepseek-key').value='synthetic-unsaved-sensitive-value';
 expired=true;await element('refresh').click();
 assert.equal(element('dashboard').hidden,true);assert.equal(element('logout').hidden,true);assert.equal(element('login').hidden,false);

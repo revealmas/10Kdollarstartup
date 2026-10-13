@@ -1,6 +1,7 @@
 PASS PHP parser private/Admin.php
 PASS PHP parser private/Core.php
 PASS PHP parser private/IntegrationSettings.php
+PASS PHP parser private/SandboxCheck.php
 PASS PHP parser private/SupabaseStore.php
 PASS PHP parser private/Transport.php
 PASS PHP parser private/config.example.php
@@ -11,6 +12,7 @@ PASS PHP parser public/admin-api.php
 PASS PHP parser public/api.php
 PASS PHP parser tests/core.php
 PASS PHP parser tests/router.php
+PASS PHP parser tests/sandbox.php
 PASS PHP parser tests/storage.php
 PASS Authenticated encrypted-storage tests
 PASS No plaintext CV in encrypted file
@@ -23,7 +25,23 @@ PASS API credentials encrypted at rest
 PASS Blank input preserves configured credential
 PASS Owner setup rejects live credentials
 PASS Invalid update leaves previous credential intact
+PASS Sandbox payment configuration can be stored without credentials in response
+PASS Payment configuration rejects URL injection
+PASS Invalid payment configuration preserves previous value
 Storage checks complete.
+PASS Bounded synthetic sandbox diagnostic tests
+PASS Synthetic diagnostic creates retrieves and expires a test Checkout
+PASS Successful diagnostic leaves the session expired
+PASS Diagnostic exercises fixed USD 9 Checkout with reviewed dynamic methods
+PASS Diagnostic does not return a credential or usable Checkout URL
+PASS Synthetic check leaves customer launch configuration unchanged
+PASS Live mode cannot invoke sandbox diagnostic
+PASS Live-mode rejection makes no provider request
+PASS Missing sandbox webhook configuration fails closed
+PASS Unexpected actual Checkout amount fails diagnostic
+PASS Failed validation attempts test-session cleanup
+PASS Owner sandbox diagnostic quota is bounded
+SANDBOX RESULT 11 mocked checks passed; no external Stripe call.
 PASS Gateway bootstrap
 PASS Secure HttpOnly cookie
 PASS No-cache private responses
@@ -50,4 +68,4 @@ PASS Bounded requests safely succeed or rate-limit
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 30 checks passed. Native pcntl concurrency passed separately in CI; 23 Hostinger checks passed separately. Real DeepSeek/Stripe provider flows remain pending.
+RESULT 33 checks passed. Native pcntl/Hostinger/provider tests still pending.

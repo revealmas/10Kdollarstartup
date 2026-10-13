@@ -28,6 +28,9 @@ check(!str_contains(file_get_contents($dir.'/data/integrations.enc'),$fixture),'
 check($settings->save(['stripe_key'=>''])['stripe_test_configured']===true,'Blank input preserves configured credential');
 try{$settings->save(['stripe_key'=>'rk_live_'.str_repeat('B',24)]);throw new RuntimeException('live key accepted');}catch(ApplyPilot\Problem $e){check($e->status===422,'Owner setup rejects live credentials');}
 check($settings->read()['stripe_key']===$fixture,'Invalid update leaves previous credential intact');
+check($settings->save(['stripe_payment_method_configuration'=>'pmc_syntheticSandbox'])['stripe_payment_method_configuration']==='pmc_syntheticSandbox','Sandbox payment configuration can be stored without credentials in response');
+try{$settings->save(['stripe_payment_method_configuration'=>'https://evil.example']);throw new RuntimeException('invalid configuration accepted');}catch(ApplyPilot\Problem $e){check($e->status===422,'Payment configuration rejects URL injection');}
+check($settings->read()['stripe_payment_method_configuration']==='pmc_syntheticSandbox','Invalid payment configuration preserves previous value');
 foreach(glob($dir.'/data/*') as $f)unlink($f);rmdir($dir.'/data');
 foreach(glob($dir.'/*') as $f)unlink($f);rmdir($dir);
 echo 'Storage checks complete.'.PHP_EOL;

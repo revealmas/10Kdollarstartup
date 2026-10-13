@@ -12,6 +12,17 @@ final class Admin {
         if($hash==='')throw new Problem(503,'Owner access has not been configured.');
         return strlen($password)<=200 && password_verify($password,$hash);
     }
+    public function reserveSandboxCheck():void {
+        $hour=intdiv(time(),3600);
+        $allowed=$this->store->transaction(function(&$s)use($hour){
+            foreach(array_keys($s['sandbox_checks']??[])as$old)if((int)$old<$hour-24)unset($s['sandbox_checks'][$old]);
+            $s['sandbox_checks'][$hour]=($s['sandbox_checks'][$hour]??0)+1;return $s['sandbox_checks'][$hour]<=3;
+        });
+        if(!$allowed)throw new Problem(429,'Sandbox checks are limited to three per hour.');
+    }
+    public function recordSandboxCheck(bool $passed):void {
+        $this->store->transaction(function(&$s)use($passed){$day=gmdate('Y-m-d');$event=$passed?'sandbox_check_passed':'sandbox_check_failed';$s['counts'][$day][$event]=($s['counts'][$day][$event]??0)+1;});
+    }
     public function snapshot(): array {
         return $this->store->transaction(function(&$s){
             $orders=[];$paid=0;$revoked=0;$active=0;
@@ -28,6 +39,7 @@ final class Admin {
             return ['totals'=>['paid_orders'=>$paid,'revoked_orders'=>$revoked,'active_packages'=>$active,'gross_verified_usd'=>$paid*9],
                 'counts'=>$s['counts'],'orders'=>array_slice($orders,0,100),'ai_calls'=>$s['ai'],
                 'jobs'=>['count'=>count($s['jobs']),'checked_at'=>$s['jobs_at']?gmdate('c',$s['jobs_at']):null],
+                'payments_environment'=>($this->config['stripe_live']??false)?'live':'test',
                 'gates'=>$gates,'storage_backend'=>$this->config['storage_backend']??'file',
                 'notice'=>'Operational counts, not a financial ledger. Reconcile fees, refunds and taxes in Stripe. CV text, provider keys and browser owner secrets are excluded.'];
         });
