@@ -1,6 +1,6 @@
 import {ApplyPilot,packageText,downloadText} from './integration.js';
 import {cvText,renderCv} from './cv-view.js';
-import {downloadCvDocx} from './cv-docx.js';
+import {downloadCvDocx} from './cv-docx.js?v=cv-2';
 import {downloadCvPdf} from './cv-pdf.js';
 const api=new ApplyPilot();const $=id=>document.getElementById(id);const status=$('status'),retry=$('retry'),download=$('download');
 const id=sessionStorage.getItem('applypilot_order');let bundle;

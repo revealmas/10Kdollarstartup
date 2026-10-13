@@ -1,4 +1,4 @@
-import {zipXml} from './docx.js';
+import {zipXml} from './docx.js?v=cv-2';
 const xml=t=>String(t).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'');
 export function cvDocxBytes(cv,contact,{example=false}={}){
  const parts=[];const p=(text,style='Normal')=>{if(text)parts.push(`<w:p><w:pPr><w:pStyle w:val="${style}"/></w:pPr><w:r><w:t xml:space="preserve">${xml(text)}</w:t></w:r></w:p>`);};
