@@ -74,7 +74,9 @@ PASS Owner snapshot exposes actual cleanup health
 PASS Cleanup failure is recorded without sensitive error disclosure
 PASS Owner health reports the latest failed execution
 PASS Snapshot allowlist excludes unexpected maintenance fields
-MAINTENANCE RESULT 8 checks passed; temporary synthetic data only.
+PASS CLI bootstrap accepts empty DOCUMENT_ROOT without treating current directory as public
+PASS Explicit public root still rejects private code placed inside it
+MAINTENANCE RESULT 10 checks passed; temporary synthetic data only.
 PASS Gateway bootstrap
 PASS Secure HttpOnly cookie
 PASS No-cache private responses

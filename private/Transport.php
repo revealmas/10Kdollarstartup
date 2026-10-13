@@ -66,7 +66,9 @@ function privateSessionDirectory(string $dir,string $kind): string {
 }
 function boot(string $dir): array {
     $dir=realpath($dir) ?: '';
-    $root=realpath($_SERVER['DOCUMENT_ROOT'] ?? '') ?: '';
+    // realpath('') resolves the working directory in CLI cron jobs, not a web root.
+    $documentRoot=$_SERVER['DOCUMENT_ROOT']??'';
+    $root=is_string($documentRoot)&&$documentRoot!==''?(realpath($documentRoot)?:''):'';
     if($dir==='' || ($root!=='' && ($dir===$root || str_starts_with($dir,$root.DIRECTORY_SEPARATOR))))
         throw new Problem(503,'Private configuration must be outside the web root.');
     $config=require $dir.'/config.php';

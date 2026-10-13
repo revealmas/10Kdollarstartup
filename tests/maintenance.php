@@ -15,5 +15,13 @@ $admin=new ApplyPilot\Admin($store,['storage_key'=>$key]);$snapshot=$admin->snap
 try{ApplyPilot\runMaintenance($store,fn()=>throw new RuntimeException('synthetic-secret-must-not-leak'),$dir);throw new RuntimeException('failure ignored');}catch(ApplyPilot\Problem $e){check($e->status===503&&!str_contains($e->getMessage(),'synthetic-secret'),'Cleanup failure is recorded without sensitive error disclosure');}
 check($admin->snapshot()['maintenance']['ok']===false,'Owner health reports the latest failed execution');
 $store->transaction(function(&$s){$s['maintenance']['secret']='synthetic-sensitive-extra';});check(!str_contains(json_encode($admin->snapshot()['maintenance']),'synthetic-sensitive-extra'),'Snapshot allowlist excludes unexpected maintenance fields');
+require_once __DIR__.'/../private/Transport.php';
+$config=require __DIR__.'/../private/config.example.php';$config['storage_key']=$key;$config['storage_file']=$dir.'/data/state.enc';
+file_put_contents($dir.'/config.php','<?php return '.var_export($config,true).';');
+$oldCwd=getcwd();$oldRoot=$_SERVER['DOCUMENT_ROOT']??null;chdir($dir);$_SERVER['DOCUMENT_ROOT']='';
+try{[$cliConfig,$cliStore,$cliService]=ApplyPilot\boot($dir);check($cliService instanceof ApplyPilot\Service,'CLI bootstrap accepts empty DOCUMENT_ROOT without treating current directory as public');}finally{chdir($oldCwd);if($oldRoot===null)unset($_SERVER['DOCUMENT_ROOT']);else $_SERVER['DOCUMENT_ROOT']=$oldRoot;}
+$_SERVER['DOCUMENT_ROOT']=$dir;
+try{ApplyPilot\boot($dir);throw new RuntimeException('public private directory accepted');}catch(ApplyPilot\Problem $e){check($e->status===503,'Explicit public root still rejects private code placed inside it');}finally{if($oldRoot===null)unset($_SERVER['DOCUMENT_ROOT']);else $_SERVER['DOCUMENT_ROOT']=$oldRoot;}
+unlink($dir.'/config.php');
 foreach(['customer','owner']as$kind){foreach(glob($dir.'/data/sessions/'.$kind.'/*')as$f)unlink($f);rmdir($dir.'/data/sessions/'.$kind);}rmdir($dir.'/data/sessions');foreach(glob($dir.'/data/*')as$f)unlink($f);rmdir($dir.'/data');rmdir($dir);
 echo 'MAINTENANCE RESULT '.$passed.' checks passed; temporary synthetic data only.'.PHP_EOL;
