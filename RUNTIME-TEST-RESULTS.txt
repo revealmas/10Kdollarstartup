@@ -68,4 +68,4 @@ PASS Bounded requests safely succeed or rate-limit
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 33 checks passed. Native pcntl/Hostinger/provider tests still pending.
+RESULT 33 local WebAssembly checks passed. Native concurrency and Hostinger access controls verified separately; actual provider/payment end-to-end tests remain pending.
