@@ -33,6 +33,13 @@ try{
   session_write_close();require_once $dir.'/SandboxCheck.php';$checker=new \ApplyPilot\SandboxCheck($config);$checker->assertReady();$admin->reserveSandboxCheck();
   try{$result=$checker->run();$admin->recordSandboxCheck(true);answer(200,$result);}catch(\ApplyPilot\Problem $e){$admin->recordSandboxCheck(false);throw $e;}
  }
+ if(in_array($action,['sandbox-preview','sandbox-checkout'],true)){
+  session_write_close();require_once $dir.'/SandboxPurchase.php';$qa=new \ApplyPilot\SandboxPurchase($store,$config);$qa->assertReady();
+  $owner=\ApplyPilot\sandboxCustomerOwner($dir,$config);
+  if($action==='sandbox-preview'){$admin->reserveSandboxCheck();answer(200,$qa->prepare($owner));}
+  if(!is_array($input)||!is_string($input['order_id']??null))throw new \ApplyPilot\Problem(422,'Invalid test order.');
+  answer(200,$qa->checkout($input['order_id'],$owner,($input['reviewed']??false)===true));
+ }
  if($action==='ai-check'){
   session_write_close();require_once $dir.'/AiCheck.php';$checker=new \ApplyPilot\AiCheck($config);$checker->assertReady();$admin->reserveAiCheck();
   try{$result=$checker->run();$admin->recordAiCheck(true);answer(200,$result);}catch(\ApplyPilot\Problem $e){$admin->recordAiCheck(false);throw $e;}

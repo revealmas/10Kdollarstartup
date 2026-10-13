@@ -14,6 +14,7 @@ jobs:
           php tests/core.php
           php tests/storage.php
           php tests/sandbox.php
+          php tests/sandbox-purchase.php
           php tests/ai-check.php
           php tests/maintenance.php
       - name: HTTP access controls and bounded local load

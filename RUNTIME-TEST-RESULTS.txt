@@ -4,6 +4,7 @@ PASS PHP parser private/Core.php
 PASS PHP parser private/IntegrationSettings.php
 PASS PHP parser private/MaintenanceRunner.php
 PASS PHP parser private/SandboxCheck.php
+PASS PHP parser private/SandboxPurchase.php
 PASS PHP parser private/SupabaseStore.php
 PASS PHP parser private/Transport.php
 PASS PHP parser private/config.example.php
@@ -16,6 +17,7 @@ PASS PHP parser tests/ai-check.php
 PASS PHP parser tests/core.php
 PASS PHP parser tests/maintenance.php
 PASS PHP parser tests/router.php
+PASS PHP parser tests/sandbox-purchase.php
 PASS PHP parser tests/sandbox.php
 PASS PHP parser tests/storage.php
 PASS Authenticated encrypted-storage tests
@@ -49,6 +51,20 @@ PASS Unexpected actual Checkout amount fails diagnostic
 PASS Failed validation attempts test-session cleanup
 PASS Owner sandbox diagnostic quota is bounded
 SANDBOX RESULT 11 mocked checks passed; no external Stripe call.
+PASS Synthetic purchase authorization and ordinary fulfillment tests
+PASS QA response exposes only useful preview
+PASS QA is explicitly synthetic and fixed at USD 9
+PASS Synthetic preparation consumes no real AI reservation
+PASS QA does not change public launch flags
+PASS Test Checkout requires preview review
+PASS Another browser cannot charge this test order
+PASS Synthetic paid contents remain locked before payment
+PASS QA calls ordinary Checkout implementation
+PASS Owner QA cannot bypass launch gates for normal customer orders
+PASS Ordinary verified webhook unlocks the owned synthetic package
+PASS Ordinary refund webhook revokes the synthetic package
+PASS Live mode cannot invoke owner synthetic purchase flow
+SANDBOX PURCHASE RESULT 12 mocked checks passed; no external provider call.
 PASS Bounded synthetic AI diagnostic tests
 PASS AI diagnostic uses one fixed synthetic provider call
 PASS AI adapter calls the fixed HTTPS provider endpoint
@@ -97,11 +113,11 @@ PASS Bounded requests safely succeed or rate-limit
   "requests": 100,
   "concurrency": 1,
   "p50_ms": 3,
-  "p95_ms": 5,
+  "p95_ms": 4,
   "responses": {
     "200": 55,
     "429": 45
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 39 checks passed. Native concurrency and actual Hostinger/provider tests are recorded separately; this local runner makes no external provider calls.
+RESULT 42 checks passed. Native concurrency and actual Hostinger/provider tests are recorded separately; this local runner makes no external provider calls.

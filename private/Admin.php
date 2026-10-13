@@ -42,12 +42,14 @@ final class Admin {
         return $this->store->transaction(function(&$s){
             $orders=[];$paid=0;$revoked=0;$active=0;
             foreach($s['orders'] as $o){
-                if($o['paid'])$paid++;if($o['paid']&&$o['revoked'])$revoked++;
-                if($o['package']&&$o['expires']>time())$active++;
+                if(!($this->config['stripe_live']??false)||($o['source']??'')!=='sandbox-qa'){
+                    if($o['paid'])$paid++;if($o['paid']&&$o['revoked'])$revoked++;
+                    if($o['package']&&$o['expires']>time())$active++;
+                }
                 $orders[]=['id'=>$o['id'],'state'=>$o['state'],'created'=>gmdate('c',$o['created']),
                     'expires'=>gmdate('c',$o['expires']),'paid'=>$o['paid'],'revoked'=>$o['revoked'],
                     'stripe_session'=>$o['checkout']['id']??null,'payment_intent'=>$o['payment_intent'],
-                    'package_present'=>(bool)$o['package']];
+                    'package_present'=>(bool)$o['package'],'synthetic'=>($o['source']??'')==='sandbox-qa'];
             }
             usort($orders,fn($a,$b)=>strcmp($b['created'],$a['created']));
             $gates=[];foreach(['ai_enabled','checkout_enabled','licence_confirmed','privacy_confirmed','tax_confirmed','merchant_confirmed','production_tests_passed']as$key)$gates[$key]=(bool)($this->config[$key]??false);
