@@ -6,7 +6,7 @@ This is an evidence review, not confirmation that MAFSAN's licence permits Apply
 - Registered business address: **CWS-2V-226580, 26th Floor, Amber Gem Tower, Ajman, United Arab Emirates**.
 - VAT: owner reports not registered and currently no earnings.
 - EmaraTax: owner reports registration, but the tax type and certificate are not supplied. Do not infer a VAT TRN or confirmed Corporate Tax registration from an EmaraTax account alone.
-- Licence issuer, listed activities/codes, current validity and support email: still missing. The address and entity suffix do not establish the licensing authority or allowed software/online-commerce scope.
+- Licence issuer: owner identifies Ajman NuVentures Free Zone, corresponding to **Ajman NuVentures Centre Free Zone (ANCFZ)**. The [authority contact page](https://ancfz.ae/contact-us/) identifies ANCFZ and its Amber Gem Tower office. Actual listed activities/codes, licence validity and monitored support email remain missing. The issuer name does not prove that the relevant activities are on this company's licence.
 
 The Stripe account label differs in punctuation (MAFSAN GLOBAL SOLUTIONS FZC LLC). The product pages now use the owner's exact trade name; live Stripe entity settings were not changed. Match the final merchant records to the actual licence before launch.
 
@@ -17,6 +17,19 @@ Product positioning: optional digital CV/application assistance software. Users 
 The [UAE government eCommerce guidance](https://u.ae/en/information-and-services/business/ecommerce/) requires the appropriate licence. Its mainland guidance says online product/service sales need eCommerce activity; free-zone permissions depend on the issuer and may need further arrangements for direct mainland sales. MAFSAN being a UAE company or having a Stripe account does not establish software/eCommerce permission. Obtain its current licence and activity schedule, confirm the software/SaaS and digital-commerce activity with the actual issuer, and check whether amendments are needed. Do not treat a prior chat's claim about Project Management as verified evidence.
 
 [MOHRE recruitment/mediation agency licensing services](https://taqyeem.mohre.gov.ae/en/services/renewal-of-recruitmenttemporary-employment-and-mediation-agency-license-2022) establish that agency activities have separate licensing. Staying within software assistance avoids intentionally offering agency services, but wording alone cannot legalise conduct that is actually recruitment. Review the final funnel and marketing against the confirmed activity.
+
+## ANCFZ activity mapping — candidates only
+
+The [ANCFZ business-activity catalogue](https://ancfz.ae/business-activities/) contains the following entries that may help the issuer classify the actual product:
+
+| Code | Catalogue activity |
+|---|---|
+| 5820001 | Software Publishing |
+| 620118ANC | Software Development Services |
+| 4790001 | E-Commerce |
+| 6312001 | Web Portals |
+
+These entries are candidates for discussion, not evidence that MAFSAN holds any of them or that every code is required. The fit of a hosted AI-assisted application-review service is an inference from the product and catalogue; only the current company licence and issuer scope confirmation can resolve it. The presence of an activity in the catalogue, or an empty additional-approval field, does not establish approval for this product. Do not substitute another Ajman zone's activity list for ANCFZ's. A licence-scope enquiry is prepared in ANCFZ-SCOPE-INQUIRY.md; it has not been sent.
 
 ## TDRA and the domain
 
@@ -48,7 +61,7 @@ Free local review is available without uploading text. AI stays disabled until t
 
 ## Launch evidence still needed
 
-- Current licence/activity schedule, issuing authority and validity; confirmation of digital software and online sale scope. Trade name/address are owner-supplied, awaiting licence reconciliation.
+- Current licence/activity schedule and validity; confirmation of digital software and online sale scope with ANCFZ. Name/address/issuer are owner-supplied, awaiting licence reconciliation.
 - TDRA/issuer determination or applicable approval, including domain suitability.
 - Confirm owner-declared non-VAT-registration, entity-wide taxable supplies/imports and forecast, inclusive-tax policy and target-country tax/consumer assessment. No VAT collection or zero-rating assumption is authorized.
 - Final Stripe product/website/support/descriptor review and actual paid fulfillment/refund/webhook tests. Restricted test key/webhook are encrypted on Hostinger; actual unpaid sandbox Checkout passed.
