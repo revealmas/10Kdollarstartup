@@ -29,11 +29,11 @@ final class Admin {
             foreach(array_keys($s['ai_checks']??[])as$old)if((int)$old<=$hour-24)unset($s['ai_checks'][$old]);
             $dayChecks=array_sum($s['ai_checks']??[]);
             $settings=$this->config;$settings['daily_ai_limit']=min(20,max(0,(int)($settings['daily_ai_limit']??0)));
-            if(($s['ai_checks'][$hour]??0)>=2||$dayChecks>=3||!reserveAiAllowance($s,$settings,$day))return false;
+            if(($s['ai_checks'][$hour]??0)>=2||$dayChecks>=4||!reserveAiAllowance($s,$settings,$day))return false;
             $s['ai_checks'][$hour]=($s['ai_checks'][$hour]??0)+1;
             return true;
         });
-        if(!$allowed)throw new Problem(429,'AI checks are limited to two per hour, three per 24 hours and the shared daily/cumulative AI allowance. Failed calls count.');
+        if(!$allowed)throw new Problem(429,'AI checks are limited to two per hour, four per 24 hours and the shared daily/cumulative AI allowance. Failed calls count.');
     }
     public function recordAiCheck(bool $passed):void {
         $this->store->transaction(function(&$s)use($passed){$day=gmdate('Y-m-d');$event=$passed?'ai_check_passed':'ai_check_failed';$s['counts'][$day][$event]=($s['counts'][$day][$event]??0)+1;});
