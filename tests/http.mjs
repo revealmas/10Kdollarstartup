@@ -43,6 +43,15 @@ try{
  check(setting.response.status===200&&setting.body.stripe_test_configured===true&&!JSON.stringify(setting.body).includes('rk_test_'),'Owner settings save without returning credential');
  const publicConfig=await req('bootstrap',{method:'GET'});check(publicConfig.body.support_email==='support@example.invalid'&&!publicConfig.body.ai_enabled&&!publicConfig.body.checkout_enabled&&!JSON.stringify(publicConfig.body).includes('rk_test_'),'Public recovery contact propagates without keys or enabling launch');
  check((await req('save-integrations',{admin:true,body:{stripe_key:'rk_live_'+'B'.repeat(24)}})).response.status===422,'Live key denied by test setup');
+ await req('save-integrations',{admin:true,body:{stripe_webhook_secret:'whsec_'+ 'B'.repeat(24)}});
+ const ownerCookie=cookie;const qa1=await req('sandbox-preview',{admin:true});
+ check(qa1.response.status===200&&!qa1.body.package,'Owner synthetic preview returns no full paid package');
+ const customerCookie=qa1.response.headers.getSetCookie().find(c=>c.startsWith('applypilot_session='));assert(customerCookie);cookie=ownerCookie+'; '+customerCookie.split(';')[0];
+ const qa2=await req('sandbox-preview',{admin:true});check(qa2.response.status===200,'Second synthetic preview reuses the customer cookie');
+ const customerConfig=await req('bootstrap',{method:'GET'});
+ check((await req('status',{body:{order_id:qa1.body.order_id},token:customerConfig.body.csrf})).response.status===200,'Owner-to-customer session switch preserves earlier order ownership');
+ const qaCounts=await req('snapshot',{admin:true});check(Object.values(qaCounts.body.ai_calls).reduce((a,b)=>a+b,0)===0,'Synthetic purchase previews do not consume DeepSeek reservations');
+
  await req('logout',{admin:true});check((await req('snapshot',{admin:true})).response.status===401,'Logout revokes owner session');
  // Bounded local-only load, no provider calls and no public stress traffic.
  const latencies=[];const statuses=[];for(let batch=0;batch<10;batch++)await Promise.all(Array.from({length:10},async()=>{const start=performance.now();const r=await fetch(base+'/api.php?action=jobs');latencies.push(performance.now()-start);statuses.push(r.status);}));

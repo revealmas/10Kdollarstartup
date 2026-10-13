@@ -45,7 +45,11 @@ final class SandboxPurchase {
 // Called only after an authenticated owner request has closed its owner session.
 // This ordinary customer cookie makes the return/download use normal authorization.
 function sandboxCustomerOwner(string $dir,array $config):string{
-    session_name('applypilot_session');session_id('');
+    session_name('applypilot_session');
+    // PHP has already consumed the owner cookie in this request. Explicitly
+    // select the customer cookie when switching session names after closing it.
+    $customerId=$_COOKIE['applypilot_session']??'';
+    session_id(is_string($customerId)&&preg_match('/^[A-Za-z0-9,-]{16,128}$/D',$customerId)?$customerId:'');
     session_save_path(privateSessionDirectory($dir,'customer'));ini_set('session.gc_maxlifetime','86400');
     session_set_cookie_params(['lifetime'=>86400,'path'=>'/','secure'=>true,'httponly'=>true,'samesite'=>'Lax']);session_start();
     if(!isset($_SESSION['owner'])){session_regenerate_id(true);$_SESSION['owner']=bin2hex(random_bytes(32));$_SESSION['csrf']=bin2hex(random_bytes(32));}
