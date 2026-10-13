@@ -86,4 +86,4 @@ PASS Bounded requests safely succeed or rate-limit
   },
   "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
 }
-RESULT 36 checks passed. Native concurrency and Hostinger access controls verified separately; actual new AI provider tests pending.
+RESULT 36 checks passed. Native concurrency and Hostinger access controls verified separately; actual synthetic Hostinger AI/Stripe checks passed separately (see docs/STATUS.md); paid flow and broader AI quality remain pending.
