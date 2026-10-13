@@ -36,3 +36,18 @@ assert.equal(element('dashboard').hidden,true);assert.equal(element('logout').hi
 assert.equal(element('totals').children.length,0);assert.equal(element('deepseek-key').value,'');
 assert.equal(element('status').textContent,'Owner sign-in required.');
 console.log('PASS Expired owner session clears dashboard and unsaved secrets, restoring sign-in');
+
+// An already fulfilled page must clear its cached package when access is revoked.
+const returnElements=new Map();const returnElement=id=>{if(!returnElements.has(id))returnElements.set(id,{hidden:true,disabled:false,textContent:'',addEventListener(type,handler){this[type]=handler;}});return returnElements.get(id);};
+const payment={paid:true,expired:false,downloads:0};
+class MockReturnApi {async start(){return {support_email:'support@example.invalid'};}async status(){if(payment.expired)throw Error('Package has expired or was deleted.');return {state:payment.paid?'paid':'revoked',paid:payment.paid};}async result(){return {package:bundle};}}
+const returnContext=vm.createContext({document:{getElementById:returnElement},ApplyPilot:MockReturnApi,packageText:()=> 'Synthetic paid preview',downloadText:()=>{payment.downloads++;},downloadDocx:()=>{payment.downloads++;},sessionStorage:{getItem:()=> 'synthetic-order'},window:{print(){}},Error});
+let returnSource=fs.readFileSync('public/return.js','utf8').replace(/^import .*\n/gm,'').replace(/check\(\);\s*$/,'await check();');
+await vm.runInContext('(async()=>{'+returnSource+'})()',returnContext);
+assert.equal(returnElement('preview').hidden,false);assert.equal(returnElement('download').hidden,false);
+payment.paid=false;await returnElement('retry').click();
+for(const id of ['preview','download','docx','pdf'])assert.equal(returnElement(id).hidden,true,'Revocation must hide '+id);
+assert.equal(returnElement('preview').textContent,'');returnElement('download').click();assert.equal(payment.downloads,0,'Hidden stale download cannot use a cached package');
+payment.paid=true;await returnElement('retry').click();payment.expired=true;await returnElement('retry').click();
+assert.equal(returnElement('preview').hidden,true);assert.equal(returnElement('preview').textContent,'');assert.equal(returnElement('status').textContent,'Package has expired or was deleted.');
+console.log('PASS Refund/expiry clears cached fulfilled content and stale download controls');
