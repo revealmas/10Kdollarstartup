@@ -13,4 +13,5 @@ $bad=$p;$bad['action_plan'][0]['job_quote']='Must have a medical qualification.'
 $bad=$p;$bad['interview_answers']=[];badPack($bad,'Empty interview preparation rejected');
 $extra=$p;$extra['secret']='must strip';$clean=ApplyPilot\validateApplicationPack($extra,$cv,$f['resume'],$f['job_description']);checkPack(!isset($clean['secret']),'Unknown provider fields stripped');
 $repair=$f['cv'];$repair['skills'][0]=['text'=>'Excel','quote'=>'Coordinated supplier communication and weekly delivery schedules.'];$fixed=ApplyPilot\validateCv($repair,$f['resume']);checkPack($fixed['skills'][0]['quote']==='Excel','Misassigned skill citation repaired only with literal CV evidence');
+checkPack(ApplyPilot\cvEvidence('supplier communication and weekly delivery schedules',"supplier communication and weekly\n delivery schedules")==="supplier communication and weekly\n delivery schedules",'Whitespace-only quotation repair returns the exact source span');
 echo "APPLICATION PACK RESULT $count checks passed\n";

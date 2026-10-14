@@ -58,6 +58,11 @@ final class AiCheck {
                         if(!preg_match('/(?<![\pL\pN])'.preg_quote($text,'/').'(?![\pL\pN])/ui',$fixture['resume']))$shape[]='synthetic skill '.$i.' not literal in fixture: '.preg_replace('/[^a-zA-Z0-9 ,&()\/-]/','',$text);
                     }
                 }
+                $inspectQuote=function($q,$path,$source)use(&$shape){if(is_string($q)&&strpos($source,$q)===false)$shape[]=$path.' unmatched fictional excerpt: '.substr(redact($q),0,220);};
+                foreach($cached['cv']['summary']['quotes']??[]as$i=>$q)$inspectQuote($q,'CV summary '.$i,$fixture['resume']);
+                foreach($cached['cv']['experience']??[]as$i=>$role){if(!is_array($role))continue;$inspectQuote($role['quote']??null,'CV role '.$i,$fixture['resume']);foreach($role['bullets']??[]as$j=>$bullet)if(is_array($bullet))$inspectQuote($bullet['quote']??null,'CV bullet '.$i.'.'.$j,$fixture['resume']);}
+                foreach($cached['application_pack']['cover_letter']??[]as$i=>$paragraph)if(is_array($paragraph))foreach($paragraph['quotes']??[]as$j=>$q)$inspectQuote($q,'Letter '.$i.'.'.$j,$fixture['resume']);
+                foreach($cached['application_pack']['interview_answers']??[]as$i=>$answer)if(is_array($answer))foreach($answer['quotes']??[]as$j=>$q)$inspectQuote($q,'Answer '.$i.'.'.$j,$fixture['resume']);
                 $inspect($cached['summary']??null,'summary',20,1000);
                 foreach($cached['strengths']??[]as$i=>$item)if(is_array($item)){$inspect($item['quote']??null,'strength quote '.$i,10,500);$inspect($item['reason']??null,'strength reason '.$i,10,700);}
                 foreach(['gaps','interview_questions','tips']as$field)foreach($cached[$field]??[]as$i=>$value)$inspect($value,$field.' '.$i,10,1000);

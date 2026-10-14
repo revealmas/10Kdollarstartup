@@ -4,7 +4,14 @@ namespace ApplyPilot;
 function cvTextValue($value,int $min,int $max):string{try{return boundedText($value,$min,$max);}catch(Problem $e){throw new Problem(502,'The CV draft has invalid text or structure. No payment is required.');}}
 function cvEvidence($value,string $source,int $min=10):string{
     $quote=cvTextValue($value,$min,700);
-    if(strpos($source,$quote)===false)throw new Problem(502,'The CV draft cited facts absent from your supplied CV. No payment is required.');
+    if(strpos($source,$quote)===false){
+        // Whitespace can change in JSON output; recover the original source span.
+        // Words, punctuation, numbers and employer attribution still must match.
+        $words=preg_split('/\s+/u',$quote);
+        $pattern='/'.implode('\s+',array_map(fn($w)=>preg_quote($w,'/'),$words)).'/u';
+        if(!preg_match($pattern,$source,$match)||strlen($match[0])>700)throw new Problem(502,'The CV draft cited facts absent from your supplied CV. No payment is required.');
+        $quote=$match[0];
+    }
     return $quote;
 }
 function cvLiteral($value,string $quote,int $max=160):string{
