@@ -31,7 +31,11 @@ function validateApplicationPack($pack,array $cv,string $source,string $job):arr
     foreach($pack['changes']as$p){
         if(!is_array($p))throw new Problem(502,'Invalid CV change.');
         $original=cvEvidence($p['original']??null,$source);$revised=cvTextValue($p['revised']??null,10,700);$found=false;
-        foreach($bullets as$b)if($b['quote']===$original&&$b['text']===$revised)$found=true;
+        foreach($bullets as$b)if($b['text']===$revised){
+            // The actual validated draft decides the before/after evidence. A model
+            // may quote a shorter source excerpt in its explanation than in the CV.
+            $original=$b['quote'];$found=true;break;
+        }
         if(!$found)throw new Problem(502,'The preview edit does not match the prepared CV. No payment is required.');
         $out['changes'][]=['original'=>$original,'revised'=>$revised,'why'=>cvTextValue($p['why']??null,20,500),'job_quote'=>cvEvidence($p['job_quote']??null,$job)];
     }

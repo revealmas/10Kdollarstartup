@@ -49,7 +49,7 @@ function validateCv(array $cv,string $source):array{
         $out['skills'][]=['text'=>$text,'quote'=>$quote];
     }
     $boundaries=[];
-    foreach(array_merge($cv['experience'],$cv['education'])as$item)if(is_array($item)&&is_string($item['quote']??null)&&$item['quote']!==''){ $pos=strpos($source,$item['quote']);if($pos!==false)$boundaries[]=$pos;}
+    foreach(array_merge($cv['experience'],$cv['education'])as$item)if(is_array($item)&&is_string($item['quote']??null)&&$item['quote']!==''){ $canonical=cvEvidence($item['quote'],$source);$pos=strpos($source,$canonical);if($pos!==false)$boundaries[]=$pos;}
     preg_match_all('/\n\s*(?:Education|Skills|Certifications|Languages)\s*(?::|\n)/i',$source,$sectionBoundaries,PREG_OFFSET_CAPTURE);
     foreach($sectionBoundaries[0]as$match)$boundaries[]=$match[1];
     sort($boundaries,SORT_NUMERIC);
