@@ -18,8 +18,9 @@ export function renderApplicationPack(pack,contact={}){
   buttons.push(b);panels.push(panel);tabs.append(b);root.append(panel);
  }
  const letter=el('article',undefined,'letter-page');for(const para of coverLetterText(pack,contact).split('\n\n'))letter.append(el('p',para));panels[0].append(letter);
- panels[1].append(el('p','These are starting answers, not invented stories. Use the prompts to recall your own examples before interviewing.','pack-note'));
+ panels[1].append(el('p','These starting answers use the facts quoted from your CV. Add a real example, your own actions and an outcome you can substantiate; never invent missing details.','pack-note'));
  pack.interview_answers.forEach((a,i)=>{const card=el('article',undefined,'answer-card');card.append(el('span',String(i+1).padStart(2,'0'),'item-number'),el('h3',a.question),el('p',a.answer),el('h4','Make it specific'),el('p',a.follow_up));const evidence=el('details');evidence.append(el('summary','See the CV evidence'),el('p',a.quotes.join('\n')));card.append(evidence);panels[1].append(card);});
+ panels[2].append(el('p','Use only examples you actually experienced. If a requirement is not evidenced, verify it before adding a claim to your application.','pack-note'));
  if(!pack.action_plan.length)panels[2].append(el('p','No additional requirement gaps were identified. Check the full posting and all application instructions before submitting.'));
  pack.action_plan.forEach(a=>{const card=el('article',undefined,'answer-card');card.append(el('span',a.status.replaceAll('_',' '),'tag'),el('h3',a.requirement),el('p',a.next_step),el('blockquote',a.job_quote));panels[2].append(card);});
  pack.changes.forEach(c=>{const card=el('article',undefined,'change-card');card.append(el('h3','A clearer connection to the role'),el('span','BEFORE','eyebrow'),el('p',c.original,'before'),el('span','AFTER','eyebrow'),el('p',c.revised,'after'),el('p',c.why),el('blockquote',c.job_quote));panels[3].append(card);});
