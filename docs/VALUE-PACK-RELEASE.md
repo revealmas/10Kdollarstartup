@@ -1,4 +1,4 @@
-# Application pack upgrade — 14 October 2026
+# Application pack upgrade — 15 October 2026
 
 The old delivery was a review report with a generic cover-letter template. New preparations must contain a validated, job-specific CV plus a complete application pack before an order can be created.
 
@@ -20,8 +20,14 @@ The example is an editorial, fictional fixture, not a live provider result or cu
 
 ## Verification and remaining limits
 
-Local PHP: core/payment access controls; 9 new application-pack cases; AI, sandbox and fulfillment regression tests. Frontend: full pack clearing on refund/expiry, stale download denial, CV/letter Word and PDF output. Browser: desktop demo tabs and keyboard navigation, homepage and actual examples. Word and PDF cover-letter renders visually inspected.
+Local PHP: core/payment access controls; 14 application-pack cases; AI, sandbox and fulfillment regression tests. Frontend: full pack clearing on refund/expiry, stale download denial, CV/letter Word and PDF output. Browser: desktop demo tabs and keyboard navigation, homepage and actual examples. Word and PDF cover-letter renders visually inspected.
 
-The new DeepSeek application-pack contract still needs an actual synthetic provider run. The diagnostic rolling quota is now four calls per 24 hours (previously three), allowing one additional acceptance test for this expanded pack contract within the user-authorized existing credit balance. The two-per-hour limit and existing 30-call cumulative pilot cap are unchanged. This is a deliberate bounded test allowance, not automatic retries. A 6,000 output-token ceiling replaces 4,500 to accommodate the additional documents; this is not a monetary spending cap.
+Actual isolated Stripe sandbox: a USD 9 test checkout was paid, the ordinary signed webhook unlocked the complete fictional pack, Word/plan downloads succeeded, and the full refund revoked access. Resending the original paid event did not restore access. No real money moved. Native CI passed for deployed code commit 5a53f59. The temporary code updater self-deleted and its scheduled job was removed; only hourly maintenance remains. The 15 October dashboard confirms expired package cleanup and three revoked synthetic paid orders.
 
-Commercial launch is still blocked on licensed activity evidence, applicant-data processing/transfer review, tax/sales-jurisdiction and live merchant checks, actual new pack provider validation, and final paid delivery QA. This release is not a claim of production capacity, exhaustive penetration testing, or guaranteed revenue.
+Actual DeepSeek: the expanded pack passed cached validation on 14 October. Manual content review then found unsupported negative experience wording and elaborated interview stories. Deployed guards now remove unsupported negative letter paragraphs and assemble interview starting answers from verified source quotes. These guards have regression coverage. The old synthetic cache expired after 24 hours. One fresh synthetic acceptance request on 15 October failed with provider unavailable before a usable response was retained. Therefore final live-provider acceptance of the latest guards remains incomplete. No customer order or charge was created. The displayed extra schema diagnostic on this transport failure is misleading because no cached report exists; it is not evidence that DeepSeek returned a malformed summary.
+
+Diagnostic limits: two calls per hour, four per rolling 24 hours, shared daily allowance and 30 cumulative pilot calls. Five provider attempts have now been made, failures included. The 6,000 output-token ceiling is not a monetary spending cap. No automatic provider retry was performed.
+
+Ten reel scripts and ten silent 25-second portrait MP4 drafts are delivered separately. They are caption-card drafts, not finished voiced footage productions; no music or scheduling. The scripts include fuller voiceover and shot directions. Social account/Metricool destination must be identified before publishing.
+
+Commercial launch remains disabled pending exact licensed activity evidence, applicant-data processing/transfer review, tax/sales-jurisdiction and live merchant checks, and a successful final provider acceptance test. Job discovery currently uses employer links; owner dashboard shows zero imported cached listings. Mobile browser sizing was not successfully verified. Local bounded load checks do not establish production capacity. This release is not exhaustive penetration testing or a revenue guarantee.

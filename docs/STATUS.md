@@ -1,3 +1,7 @@
+## 15 October: current delivery and blockers
+
+See [VALUE-PACK-RELEASE.md](VALUE-PACK-RELEASE.md) for current tested status, failed provider acceptance, delivered media and launch blockers. All entries below are historical.
+
 ## 14 October: application pack upgrade
 
 See [VALUE-PACK-RELEASE.md](VALUE-PACK-RELEASE.md) for the current product and verification scope. Older entries below are historical and must not be used as current feature or test claims.
