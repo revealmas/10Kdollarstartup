@@ -52,12 +52,18 @@ async function jobs(query){
   const response=await fetch(url,{cache:'no-store',credentials:'same-origin'});const result=await response.json();
   if(!response.ok)throw new Error(result.error||'Listings are temporarily unavailable.');
   $('jobs-list').replaceChildren();$('jobs-status').textContent=result.notice||`${result.jobs.length} listings · source checked ${new Date(result.checked_at).toLocaleString()}. Availability can change. Jobicy listings cover recent remote roles, may have location restrictions and are delayed by at least 3 hours.`;
-  for(const job of result.jobs){
+  let shown=0; const more=document.createElement('button');more.type='button';more.className='btn secondary';
+  function nextPage(){
+  more.remove();const page=result.jobs.slice(shown,shown+12);shown+=page.length;
+  for(const job of page){
     const href=new URL(job.apply_url);if(href.protocol!=='https:'||!['boards.greenhouse.io','job-boards.greenhouse.io','jobs.lever.co','jobs.eu.lever.co','jobicy.com'].includes(href.hostname))continue;
     const article=document.createElement('article');article.className='job';const h=document.createElement('h3');h.textContent=job.title;
     const p=document.createElement('p');p.textContent=`${job.employer} · ${job.location} · ${job.source}`;
     const a=document.createElement('a');a.href=href.href;a.target='_blank';a.rel='noopener noreferrer';a.textContent=job.source==='Jobicy'?'View on Jobicy ↗':'View employer posting ↗';article.append(h,p,a);$('jobs-list').append(article);
   }
+  if(shown<result.jobs.length){more.textContent=`Show more jobs (${result.jobs.length-shown} remaining)`;$('jobs-list').append(more);}
+  }
+  more.addEventListener('click',nextPage);nextPage();
 }
 $('jobs-form').addEventListener('submit',async event=>{event.preventDefault();try{await jobs($('job-query').value);}catch(e){$('jobs-status').textContent='Live listings are not available yet. Browse the official employer boards below.';}});
 setup();
