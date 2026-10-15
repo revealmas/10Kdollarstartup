@@ -1,0 +1,130 @@
+PASS PHP parser private/Admin.php
+PASS PHP parser private/AiCheck.php
+PASS PHP parser private/ApplicationPack.php
+PASS PHP parser private/Core.php
+PASS PHP parser private/Cv.php
+PASS PHP parser private/IntegrationSettings.php
+PASS PHP parser private/MaintenanceRunner.php
+PASS PHP parser private/SandboxCheck.php
+PASS PHP parser private/SandboxPurchase.php
+PASS PHP parser private/SupabaseStore.php
+PASS PHP parser private/SyntheticCv.php
+PASS PHP parser private/Transport.php
+PASS PHP parser private/config.example.php
+PASS PHP parser private/maintenance.php
+PASS PHP parser private/metrics.php
+PASS PHP parser private/refresh_jobs.php
+PASS PHP parser public/admin-api.php
+PASS PHP parser public/api.php
+PASS PHP parser tests/ai-check.php
+PASS PHP parser tests/application-pack.php
+PASS PHP parser tests/core.php
+PASS PHP parser tests/maintenance.php
+PASS PHP parser tests/router.php
+PASS PHP parser tests/sandbox-purchase.php
+PASS PHP parser tests/sandbox.php
+PASS PHP parser tests/storage.php
+PASS Authenticated encrypted-storage tests
+PASS No plaintext CV in encrypted file
+PASS Encrypted storage round trip
+PASS Wrong encryption key rejected
+PASS Authenticated encryption rejects tampering
+SKIP pcntl concurrency unavailable
+PASS Settings response excludes API credential
+PASS API credentials encrypted at rest
+PASS Blank input preserves configured credential
+PASS Owner setup rejects live credentials
+PASS Invalid update leaves previous credential intact
+PASS Sandbox payment configuration can be stored without credentials in response
+PASS Payment configuration rejects URL injection
+PASS Invalid payment configuration preserves previous value
+PASS Owner can configure a valid public support email without exposing credentials
+PASS Support address rejects header injection
+PASS Invalid support update preserves all previous settings atomically
+Storage checks complete.
+PASS Bounded synthetic sandbox diagnostic tests
+PASS Synthetic diagnostic creates retrieves and expires a test Checkout
+PASS Successful diagnostic leaves the session expired
+PASS Diagnostic exercises fixed USD 9 Checkout with reviewed dynamic methods
+PASS Diagnostic does not return a credential or usable Checkout URL
+PASS Synthetic check leaves customer launch configuration unchanged
+PASS Live mode cannot invoke sandbox diagnostic
+PASS Live-mode rejection makes no provider request
+PASS Missing sandbox webhook configuration fails closed
+PASS Unexpected actual Checkout amount fails diagnostic
+PASS Failed validation attempts test-session cleanup
+PASS Owner sandbox diagnostic quota is bounded
+SANDBOX RESULT 11 mocked checks passed; no external Stripe call.
+PASS Synthetic purchase authorization and ordinary fulfillment tests
+PASS QA response exposes only useful preview
+PASS QA is explicitly synthetic and fixed at USD 9
+PASS Synthetic preparation consumes no real AI reservation
+PASS QA does not change public launch flags
+PASS Test Checkout requires preview review
+PASS Another browser cannot charge this test order
+PASS Synthetic paid contents remain locked before payment
+PASS QA calls ordinary Checkout implementation
+PASS Owner QA cannot bypass launch gates for normal customer orders
+PASS Ordinary verified webhook unlocks the owned synthetic package
+PASS Ordinary refund webhook revokes the synthetic package
+PASS Live mode cannot invoke owner synthetic purchase flow
+SANDBOX PURCHASE RESULT 12 mocked checks passed; no external provider call.
+PASS Bounded synthetic AI diagnostic tests
+PASS AI diagnostic uses one fixed synthetic provider call
+PASS AI adapter calls the fixed HTTPS provider endpoint
+PASS Bounded non-thinking JSON request avoids default reasoning cost
+PASS Provider request requires structured JSON
+PASS Diagnostic input contains synthetic fixture only
+PASS Diagnostic response excludes credentials, reasoning and unexpected provider fields
+PASS Diagnostic exposes no customer order and leaves launch gates unchanged
+PASS Invented CV evidence rejects the diagnostic
+PASS Truncated provider output rejects the diagnostic without retries
+PASS Missing AI configuration fails before the provider
+PASS Missing settings consume no provider request
+PASS Repeated AI diagnostics cannot consume more than two hourly calls
+PASS Diagnostic credit reservation shares customer daily AI counts
+PASS Zero daily credit allowance prevents diagnostic calls
+PASS Owner diagnostics also respect the cumulative pilot allowance
+PASS Cached synthetic draft revalidates without another provider call
+PASS No cached draft cannot trigger an implicit provider retry
+PASS Diagnostic errors use fixed allowlisted messages only
+AI CHECK RESULT 18 mocked checks passed; no external provider call.
+PASS Scheduled cleanup health and private session tests
+PASS Maintenance confirms purged packages and expired sessions
+PASS Expired private sessions removed
+PASS Active private sessions preserved
+PASS Cleanup output excludes unexpected private fields
+PASS Owner snapshot exposes actual cleanup health
+PASS Cleanup failure is recorded without sensitive error disclosure
+PASS Owner health reports the latest failed execution
+PASS Snapshot allowlist excludes unexpected maintenance fields
+PASS CLI bootstrap accepts empty DOCUMENT_ROOT without treating current directory as public
+PASS Explicit public root still rejects private code placed inside it
+MAINTENANCE RESULT 10 checks passed; temporary synthetic data only.
+PASS Gateway bootstrap
+PASS Secure HttpOnly cookie
+PASS No-cache private responses
+PASS Guessed package denied
+PASS Forged CSRF denied
+PASS Wrong origin denied
+PASS AI fails closed without configuration
+PASS Unsigned webhook denied
+PASS Anonymous admin snapshot denied
+PASS Wrong admin password denied
+PASS Authenticated admin sign-in
+PASS Authenticated operational snapshot
+PASS Dashboard excludes owner password
+PASS Sign-out revokes owner session
+PASS Bounded requests safely succeed or rate-limit
+{
+  "requests": 100,
+  "concurrency": 1,
+  "p50_ms": 4,
+  "p95_ms": 5,
+  "responses": {
+    "200": 55,
+    "429": 45
+  },
+  "scope": "Sequential local PHP WebAssembly gateway requests; not a production capacity benchmark."
+}
+RESULT 46 checks passed. Native concurrency and actual Hostinger/provider tests are recorded separately; this local runner makes no external provider calls.

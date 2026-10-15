@@ -1,0 +1,33 @@
+name: Verify ApplyPilot
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP syntax and security tests
+        run: |
+          php --version
+          find private public tests -name '*.php' -print0 | xargs -0 -n1 php -l
+          php tests/core.php
+          php tests/application-pack.php
+          php tests/storage.php
+          php tests/sandbox.php
+          php tests/sandbox-purchase.php
+          php tests/ai-check.php
+          php tests/maintenance.php
+          php tests/public-jobs.php
+      - name: HTTP access controls and bounded local load
+        run: node tests/http.mjs
+      - name: Frontend and export verification
+        run: |
+          node tests/frontend.mjs
+          python3 - <<'PY'
+          import zipfile, xml.etree.ElementTree as ET
+          for filename in ['work/test-export.docx','work/test-cv.docx','work/test-letter.docx']:
+              with zipfile.ZipFile(filename) as z:
+                  assert z.testzip() is None
+                  for name in z.namelist(): ET.fromstring(z.read(name))
+          PY

@@ -1,0 +1,75 @@
+<?php
+declare(strict_types=1);
+namespace ApplyPilot;
+require_once __DIR__.'/Transport.php';
+require_once __DIR__.'/SyntheticCv.php';
+final class AiCheckMemoryStore implements Store {
+    private array $data=['orders'=>[],'counts'=>[],'limits'=>[],'jobs'=>[],'jobs_at'=>0,'ai'=>[]];
+    public function transaction(callable $fn){$copy=$this->data;$out=$fn($copy);$this->data=$copy;return $out;}
+}
+final class AiCheck {
+    private array $config;private $provider;private ?Store $diagnostics;
+    public function __construct(array $config,?callable $provider=null,?Store $diagnostics=null){$this->config=$config;$this->provider=$provider??deepseek($config);$this->diagnostics=$diagnostics;}
+    public function assertReady():void {
+        if(empty($this->config['deepseek_key'])||empty($this->config['deepseek_model']))
+            throw new Problem(503,'Save the DeepSeek key and account-available model first.');
+    }
+    public function run(bool $revalidate=false):array {
+        $this->assertReady();$settings=$this->config;
+        // Synthetic-only overrides are never saved to the customer configuration.
+        $settings['ai_enabled']=true;$settings['privacy_confirmed']=true;$settings['daily_ai_limit']=1;
+        $memory=new AiCheckMemoryStore();$fixture=syntheticCvFixture();
+        $fixtureHash=hash('sha256',json_encode(['application-pack-v1',$fixture['resume'],$fixture['job_description']]));
+        if($revalidate){
+            $cached=$this->diagnostics?->transaction(fn(&$s)=>$s['synthetic_ai_report']??null);
+            if(!is_array($cached)||($cached['expires_at']??0)<time()||($cached['fixture_hash']??'')!==$fixtureHash)
+                throw new Problem(409,'No recent synthetic provider draft is available. Run one connection check first.');
+            $provider=fn()=> $cached['report'];
+        }else{
+            $provider=function($resume,$job)use($fixtureHash){
+                $report=($this->provider)($resume,$job);
+                $safe=array_intersect_key($report,array_flip(['summary','strengths','gaps','interview_questions','tips','cv','application_pack']));
+                if($this->diagnostics&&strlen(json_encode($safe))<=65536)$this->diagnostics->transaction(function(&$s)use($safe,$fixtureHash){$s['synthetic_ai_report']=['report'=>$safe,'fixture_hash'=>$fixtureHash,'expires_at'=>time()+86400];});
+                return $report;
+            };
+        }
+        $service=new Service($memory,$settings,$provider,
+            fn()=>throw new Problem(500,'AI connection checks cannot call payments.'));
+        try {
+            $preview=$service->prepare([
+                'resume'=>$fixture['resume'],
+                'job_description'=>$fixture['job_description'],
+                'consent'=>true,'adult'=>true],bin2hex(random_bytes(32)));
+            return ['ok'=>true,'model'=>$this->config['deepseek_model'],
+                'checks'=>[$revalidate?'Saved actual provider response revalidated without a new API call':'Actual provider response','Structured JSON validated','Every strength quote matched the synthetic CV','CV employers, dates, skills and numeric claims checked','Useful preview and structured CV prepared'],
+                'preview'=>$preview['preview'],'synthetic_cv'=>$memory->transaction(fn(&$s)=>$s['orders'][$preview['order_id']]['package']['cv']),
+                'synthetic_application_pack'=>$memory->transaction(fn(&$s)=>$s['orders'][$preview['order_id']]['package']['application_pack']),
+                'revalidated'=>$revalidate,'notice'=>'Fixed fictional CV only. The synthetic provider draft is encrypted for up to 24 hours to recheck validation without spending credits. No real applicant data, customer order, payment or launch flag was created. New provider calls, including failures, consume the allowance. This checks connection and schema, not general output quality or privacy clearance.'];
+        }catch(\Throwable $e){
+            $known=['The cover letter contains unsupported experience claims. No payment is required.','The application pack is incomplete. No payment is required.','The target role could not be verified. No payment is required.','Cover letter evidence is incomplete.','Interview evidence is incomplete.','Invalid application action.','Invalid CV change.','The preview edit does not match the prepared CV. No payment is required.','Please check the text length and format.','The provider is unavailable. Please retry later.','AI preparation was incomplete. No payment is required.','AI preparation was invalid. No payment is required.','The analysis could not be validated. No payment is required.','The analysis cited experience not in your CV. No payment is required.','The CV draft has invalid text or structure. No payment is required.','The CV draft cited facts absent from your supplied CV. No payment is required.','A CV employer, qualification or date could not be verified. No payment is required.','CV evidence is incomplete. No payment is required.','The CV draft added a number not supported by its evidence. No payment is required.','The CV headline must use a role or phrase in your supplied CV.','The CV summary could not be validated.','The CV structure could not be validated.','Invalid CV skill.','A CV skill was not present in its source evidence.','CV experience could not be validated.','Invalid CV bullet.','A CV bullet was attributed to a different source role. No payment is required.','Invalid CV education.'];
+            $known=array_merge($known,transportFailureMessages());
+            $reason=$e instanceof Problem&&in_array($e->getMessage(),$known,true)?$e->getMessage():'Check model, credits and provider settings.';
+            $shape=[];$cached=$this->diagnostics?->transaction(fn(&$s)=>$s['synthetic_ai_report']['report']??[]);
+            if(is_array($cached)&&$cached!==[]&&!in_array($reason,transportFailureMessages(),true)){
+                $inspect=function($value,$field,$min,$max)use(&$shape){if(!is_string($value))$shape[]=$field.' is not text';elseif(strlen(trim($value))<$min||strlen($value)>$max)$shape[]=$field.' length '.strlen(trim($value)).' (expected '.$min.'..'.$max.')';};
+                // Fixed synthetic fixture only; never inspect customer reports here.
+                foreach($cached['cv']['skills']??[]as$i=>$skill){
+                    if(is_array($skill)&&is_string($skill['text']??null)){
+                        $text=substr($skill['text'],0,90);
+                        if(!preg_match('/(?<![\pL\pN])'.preg_quote($text,'/').'(?![\pL\pN])/ui',$fixture['resume']))$shape[]='synthetic skill '.$i.' not literal in fixture: '.preg_replace('/[^a-zA-Z0-9 ,&()\/-]/','',$text);
+                    }
+                }
+                $inspectQuote=function($q,$path,$source)use(&$shape){if(is_string($q)&&strpos($source,$q)===false)$shape[]=$path.' unmatched fictional excerpt: '.substr(redact($q),0,220);};
+                foreach($cached['cv']['summary']['quotes']??[]as$i=>$q)$inspectQuote($q,'CV summary '.$i,$fixture['resume']);
+                foreach($cached['cv']['experience']??[]as$i=>$role){if(!is_array($role))continue;$inspectQuote($role['quote']??null,'CV role '.$i,$fixture['resume']);foreach($role['bullets']??[]as$j=>$bullet)if(is_array($bullet))$inspectQuote($bullet['quote']??null,'CV bullet '.$i.'.'.$j,$fixture['resume']);}
+                foreach($cached['application_pack']['cover_letter']??[]as$i=>$paragraph)if(is_array($paragraph))foreach($paragraph['quotes']??[]as$j=>$q)$inspectQuote($q,'Letter '.$i.'.'.$j,$fixture['resume']);
+                foreach($cached['application_pack']['interview_answers']??[]as$i=>$answer)if(is_array($answer))foreach($answer['quotes']??[]as$j=>$q)$inspectQuote($q,'Answer '.$i.'.'.$j,$fixture['resume']);
+                $inspect($cached['summary']??null,'summary',20,1000);
+                foreach($cached['strengths']??[]as$i=>$item)if(is_array($item)){$inspect($item['quote']??null,'strength quote '.$i,10,500);$inspect($item['reason']??null,'strength reason '.$i,10,700);}
+                foreach(['gaps','interview_questions','tips']as$field)foreach($cached[$field]??[]as$i=>$value)$inspect($value,$field.' '.$i,10,1000);
+            }
+            $details=$shape?' Schema: '.implode('; ',array_slice($shape,0,8)).'.':'';
+            throw new Problem(502,'Synthetic AI check failed: '.$reason.$details.' No credentials or applicant data are exposed.');
+        }
+    }
+}
