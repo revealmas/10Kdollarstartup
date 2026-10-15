@@ -40,4 +40,12 @@ rejects(fn()=>$closed->reserveAiCheck(),429,'Owner diagnostics also respect the 
 $config['total_ai_limit']=30;$finish='stop';$cache=new AiCheckMemoryStore();$cachedChecker=new AiCheck($config,$provider,$cache);$cachedChecker->run();$before=$calls;$rechecked=$cachedChecker->run(true);check($calls===$before&&$rechecked['revalidated']===true,'Cached synthetic draft revalidates without another provider call');
 $missing=new AiCheck($config,$provider,new AiCheckMemoryStore());rejects(fn()=> $missing->run(true),409,'No cached draft cannot trigger an implicit provider retry');
 $unsafe=new AiCheck($config,fn()=>throw new Problem(502,'sk-secret-untrusted-provider-error'));try{$unsafe->run();}catch(Problem $e){check(!str_contains($e->getMessage(),'sk-secret'),'Diagnostic errors use fixed allowlisted messages only');}
+foreach([[401,0,true,'authentication'],[402,0,true,'balance'],[429,0,true,'rate limit'],[503,0,true,'temporarily'],[0,28,false,'timed out'],[0,6,false,'network']] as [$status,$errno,$ok,$label]) {
+ check(str_contains(ApplyPilot\transportFailure($status,$errno,$ok),$label),'Transport classifies '.$label.' without response bodies');
+}
+check(ApplyPilot\transportFailure(200,0,true)===null,'Successful transport has no false diagnostic');
+$failedTransport=new AiCheck($config,fn()=>throw new Problem(502,'Provider request timed out.'),new AiCheckMemoryStore());
+try{$failedTransport->run();throw new RuntimeException('Transport failure accepted');}catch(Problem $e){check(str_contains($e->getMessage(),'timed out')&&!str_contains($e->getMessage(),'Schema:'),'Transport failure does not invent a missing-summary schema error');}
+$cachedTransport=new AiCheck($config,fn()=>throw new Problem(502,'Provider credit balance is insufficient.'),$cache);
+try{$cachedTransport->run();throw new RuntimeException('Transport failure accepted');}catch(Problem $e){check(str_contains($e->getMessage(),'balance')&&!str_contains($e->getMessage(),'Schema:'),'Transport failure does not diagnose a stale cached response');}
 echo 'AI CHECK RESULT '.$passed.' mocked checks passed; no external provider call.'.PHP_EOL;

@@ -3,6 +3,22 @@ declare(strict_types=1);
 namespace ApplyPilot;
 require_once __DIR__.'/Core.php';
 
+// Fixed, credential-free classifications. Never expose provider bodies or cURL text.
+function transportFailure(int $status,int $errno,bool $success): ?string {
+    if($errno===28) return 'Provider request timed out.';
+    if(!$success) return 'Provider network connection failed.';
+    return match($status) {
+        400,422 => 'Provider rejected the request format.',
+        401,403 => 'Provider authentication or permission failed.',
+        402 => 'Provider credit balance is insufficient.',
+        404 => 'Provider endpoint or model was not found.',
+        429 => 'Provider rate limit reached.',
+        default => $status>=200&&$status<300?null:($status>=500?'Provider service is temporarily unavailable.':'Provider request was rejected.')
+    };
+}
+function transportFailureMessages(): array {
+    return ['Provider request timed out.','Provider network connection failed.','Provider rejected the request format.','Provider authentication or permission failed.','Provider credit balance is insufficient.','Provider endpoint or model was not found.','Provider rate limit reached.','Provider service is temporarily unavailable.','Provider request was rejected.'];
+}
 function requestJson(string $url,string $method,array $headers,?string $body=null,int $maxBytes=1048576): array {
     if (!function_exists('curl_init')) throw new Problem(503,'Server HTTP support is unavailable.');
     $ch=curl_init($url); $response='';
@@ -15,9 +31,10 @@ function requestJson(string $url,string $method,array $headers,?string $body=nul
             $response.=$chunk; return strlen($chunk);
         }]);
     if($body!==null) curl_setopt($ch,CURLOPT_POSTFIELDS,$body);
-    $ok=curl_exec($ch); $status=curl_getinfo($ch,CURLINFO_RESPONSE_CODE); curl_close($ch);
+    $ok=curl_exec($ch); $status=(int)curl_getinfo($ch,CURLINFO_RESPONSE_CODE); $errno=curl_errno($ch); curl_close($ch);
     // Never return provider error bodies, request headers, or CVs to the browser/logs.
-    if($ok===false || $status<200 || $status>=300) throw new Problem(502,'The provider is unavailable. Please retry later.');
+    $failure=transportFailure($status,$errno,$ok!==false);
+    if($failure!==null) throw new Problem(502,$failure);
     try { $result=json_decode($response,true,512,JSON_THROW_ON_ERROR); }
     catch(\Throwable $e){ throw new Problem(502,'The provider returned an invalid response.'); }
     if(!is_array($result)) throw new Problem(502,'The provider returned an invalid response.');
